@@ -1,63 +1,18 @@
-import { translateGameEvent } from "@/utils/translation";
-import type { TranslatedGameEvent } from "@/utils/translation";
+import { useDynamicConnector } from "@/contexts/starknet";
 import { VRF_PROVIDER } from "@/utils/networkConfig";
+import type { TranslatedGameEvent } from "@/utils/translation";
+import { translateGameEvent } from "@/utils/translation";
 import { useAccount } from "@starknet-react/core";
 import { useSnackbar } from "notistack";
-import { CallData } from "starknet";
 import type { Call } from "starknet";
-
-type TransactionReceiptLike = {
-  execution_status?: string;
-  actual_fee?: { amount?: string | number | bigint } | string | number | bigint;
-  events?: unknown[];
-};
-
-const parseExecutionError = (error: unknown): string => {
-  const fallback = "Error executing action";
-  const isValidMessage = (m: string) =>
-    m.length > 3 &&
-    !m.includes("FAILED") &&
-    !m.includes("argent/") &&
-    !m.startsWith("0x");
-  const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-
-  try {
-    if (!error || typeof error !== "string") return fallback;
-
-    const singleQuoteMatches = error.match(/\('([^']+)'\)/g);
-    if (singleQuoteMatches) {
-      const message = singleQuoteMatches
-        .map((m) => m.slice(2, -2))
-        .find(isValidMessage);
-      if (message) return capitalize(message);
-    }
-
-    const escapedMatches = error.match(/\\"([^"\\]+)\\"/g);
-    if (escapedMatches) {
-      const message = escapedMatches
-        .map((m) => m.replace(/\\"/g, ""))
-        .find(isValidMessage);
-      if (message) return capitalize(message);
-    }
-
-    const doubleQuoteMatches = error.match(/"([^"]+)"/g);
-    if (doubleQuoteMatches) {
-      const message = doubleQuoteMatches
-        .map((m) => m.slice(1, -1))
-        .find(isValidMessage);
-      if (message) return capitalize(message);
-    }
-
-    return fallback;
-  } catch {
-    return fallback;
-  }
-};
+import { CallData } from "starknet";
 
 export const useSystemCalls = () => {
   const { account } = useAccount();
   const { enqueueSnackbar } = useSnackbar();
-  const GAME_ADDRESS = import.meta.env.VITE_PUBLIC_GAME_ADDRESS;
+  const { currentNetworkConfig } = useDynamicConnector();
+
+  const GAME_ADDRESS = currentNetworkConfig.gameAddress;
 
   // ── Core execution ──
   const executeAction = async (
@@ -74,6 +29,9 @@ export const useSystemCalls = () => {
       const receipt = await waitForTransaction(tx.transaction_hash, 0);
 
       if (receipt.execution_status === "REVERTED") {
+        enqueueSnackbar("Transaction reverted", {
+          variant: "error",
+        });
         onFailure();
         return undefined;
       }
@@ -94,14 +52,14 @@ export const useSystemCalls = () => {
 
       const executionError =
         typeof error === "object" &&
-        error !== null &&
-        "data" in error &&
-        typeof (error as { data?: unknown }).data === "object" &&
-        (error as { data?: unknown }).data !== null &&
-        "execution_error" in
+          error !== null &&
+          "data" in error &&
+          typeof (error as { data?: unknown }).data === "object" &&
+          (error as { data?: unknown }).data !== null &&
+          "execution_error" in
           (error as { data: Record<string, unknown> }).data
           ? (error as { data: { execution_error?: unknown } }).data
-              .execution_error
+            .execution_error
           : undefined;
 
       enqueueSnackbar(parseExecutionError(executionError), {
@@ -212,4 +170,52 @@ export const useSystemCalls = () => {
     submitScore,
     getGameState,
   };
+};
+
+type TransactionReceiptLike = {
+  execution_status?: string;
+  actual_fee?: { amount?: string | number | bigint } | string | number | bigint;
+  events?: unknown[];
+};
+
+const parseExecutionError = (error: unknown): string => {
+  const fallback = "Error executing action";
+  const isValidMessage = (m: string) =>
+    m.length > 3 &&
+    !m.includes("FAILED") &&
+    !m.includes("argent/") &&
+    !m.startsWith("0x");
+  const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+  try {
+    if (!error || typeof error !== "string") return fallback;
+
+    const singleQuoteMatches = error.match(/\('([^']+)'\)/g);
+    if (singleQuoteMatches) {
+      const message = singleQuoteMatches
+        .map((m) => m.slice(2, -2))
+        .find(isValidMessage);
+      if (message) return capitalize(message);
+    }
+
+    const escapedMatches = error.match(/\\"([^"\\]+)\\"/g);
+    if (escapedMatches) {
+      const message = escapedMatches
+        .map((m) => m.replace(/\\"/g, ""))
+        .find(isValidMessage);
+      if (message) return capitalize(message);
+    }
+
+    const doubleQuoteMatches = error.match(/"([^"]+)"/g);
+    if (doubleQuoteMatches) {
+      const message = doubleQuoteMatches
+        .map((m) => m.slice(1, -1))
+        .find(isValidMessage);
+      if (message) return capitalize(message);
+    }
+
+    return fallback;
+  } catch {
+    return fallback;
+  }
 };

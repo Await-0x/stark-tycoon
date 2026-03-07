@@ -1,3 +1,6 @@
+import manifest from "../../manifest.json";
+import { getContractByName } from "@dojoengine/core";
+
 export const VRF_PROVIDER =
   "0x051fea4450da9d6aee758bdeba88b2f665bcbf549d2c61421aa724e9ac0ced8f";
 
@@ -6,44 +9,22 @@ export enum ChainId {
   SN_SEPOLIA = "SN_SEPOLIA",
 }
 
-export interface TokenConfig {
-  name: string;
-  address: string;
-  displayDecimals: number;
-  decimals?: number;
-  symbol?: string;
-}
-
 export interface NetworkConfig {
   chainId: ChainId;
-  slot: string;
-  preset: string;
+  manifest: any;
+  namespace: string;
   policies: Record<string, unknown>;
   rpcUrl: string;
-  toriiUrl: string;
-  apiUrl: string;
-  wsUrl: string;
   chains: Array<{ rpcUrl: string }>;
-  tokens: { erc20: TokenConfig[] };
-  gameContract: string;
+  gameAddress: string;
 }
 
 const NETWORKS = {
-  SN_MAIN: {
-    chainId: ChainId.SN_MAIN,
-    slot: "starktycoon",
-    rpcUrl: "https://api.cartridge.gg/x/starknet/mainnet/rpc/v0_9",
-    torii: "https://api.cartridge.gg/x/starktycoon-torii/torii",
-    apiUrl: "https://api.cartridge.gg/x/starktycoon",
-    wsUrl: "wss://api.cartridge.gg/x/starktycoon/ws",
-  },
   SN_SEPOLIA: {
     chainId: ChainId.SN_SEPOLIA,
-    slot: "starktycoon-sepolia",
-    rpcUrl: "https://api.cartridge.gg/x/starknet/sepolia/rpc/v0_9",
-    torii: "https://api.cartridge.gg/x/starktycoon-sepolia-torii/torii",
-    apiUrl: "https://api.cartridge.gg/x/starktycoon-sepolia",
-    wsUrl: "wss://api.cartridge.gg/x/starktycoon-sepolia/ws",
+    manifest,
+    namespace: "ST_0_0_1",
+    rpcUrl: "https://api.cartridge.gg/x/starknet/sepolia",
   },
 };
 
@@ -92,25 +73,21 @@ function buildPolicies(gameAddress: string) {
 }
 
 export function getNetworkConfig(
-  networkKey: string = import.meta.env.VITE_PUBLIC_CHAIN ?? "SN_MAIN"
+  networkKey: string = ChainId.SN_SEPOLIA
 ): NetworkConfig {
   const network = NETWORKS[networkKey as keyof typeof NETWORKS];
   if (!network) throw new Error(`Network ${networkKey} not found`);
 
-  const gameAddress = import.meta.env.VITE_PUBLIC_GAME_ADDRESS ?? "";
+  const gameAddress = getContractByName(network.manifest, network.namespace, "ST_0_0_1-starktycoon")?.address
   const policies = buildPolicies(gameAddress);
 
   return {
     chainId: network.chainId,
-    slot: network.slot,
-    preset: "starktycoon",
+    manifest: network.manifest,
+    namespace: network.namespace,
     policies,
     rpcUrl: network.rpcUrl,
-    toriiUrl: network.torii,
-    apiUrl: network.apiUrl,
-    wsUrl: network.wsUrl,
     chains: [{ rpcUrl: network.rpcUrl }],
-    tokens: { erc20: [] },
-    gameContract: gameAddress,
+    gameAddress: gameAddress,
   };
 }

@@ -1,5 +1,5 @@
 [package]
-name = "starktycoon"
+name = "stark_tycoon"
 version = "0.1.0"
 edition = "2024_07"
 
@@ -9,14 +9,13 @@ sierra-replace-ids = true
 [dependencies]
 dojo = "1.8.0"
 starknet = "2.15.1"
-game_components_embeddable_game_standard = { git = "https://github.com/Provable-Games/game-components.git", branch = "next" }
-game_components_utilities = { git = "https://github.com/Provable-Games/game-components.git", branch = "next" }
+game_components_embeddable_game_standard = { git = "https://github.com/Provable-Games/game-components.git" }
+game_components_utilities = { git = "https://github.com/Provable-Games/game-components.git" }
 openzeppelin_introspection = { git = "https://github.com/OpenZeppelin/cairo-contracts.git", tag = "v3.0.0" }
 
 [dev-dependencies]
 cairo_test = "2.15.1"
 dojo_cairo_test = "1.8.0"
-game_components_test_common = { git = "https://github.com/Provable-Games/game-components.git", branch = "next" }
 
 [[target.starknet-contract]]
 build-external-contracts = ["dojo::world::world_contract::world"]

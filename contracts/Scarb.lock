@@ -80,7 +80,7 @@ source = "git+https://github.com/EkuboProtocol/starknet-contracts.git?tag=v4.0.1
 [[package]]
 name = "game_components_embeddable_game_standard"
 version = "1.5.1"
-source = "git+https://github.com/Provable-Games/game-components.git?branch=next#3322d946804c02ea0b56c821ad81b80388c24fdb"
+source = "git+https://github.com/Provable-Games/game-components.git#6bcb819582f0e71fa984532d9a68dbf12ad8791d"
 dependencies = [
  "game_components_interfaces",
  "game_components_metagame",
@@ -94,7 +94,7 @@ dependencies = [
 [[package]]
 name = "game_components_interfaces"
 version = "1.5.1"
-source = "git+https://github.com/Provable-Games/game-components.git?branch=next#3322d946804c02ea0b56c821ad81b80388c24fdb"
+source = "git+https://github.com/Provable-Games/game-components.git#6bcb819582f0e71fa984532d9a68dbf12ad8791d"
 dependencies = [
  "ekubo",
  "interfaces",
@@ -103,36 +103,19 @@ dependencies = [
 [[package]]
 name = "game_components_metagame"
 version = "1.5.1"
-source = "git+https://github.com/Provable-Games/game-components.git?branch=next#3322d946804c02ea0b56c821ad81b80388c24fdb"
+source = "git+https://github.com/Provable-Games/game-components.git#6bcb819582f0e71fa984532d9a68dbf12ad8791d"
 dependencies = [
  "game_components_interfaces",
  "game_components_utilities",
  "interfaces",
  "openzeppelin_interfaces",
  "openzeppelin_introspection",
-]
-
-[[package]]
-name = "game_components_test_common"
-version = "1.5.1"
-source = "git+https://github.com/Provable-Games/game-components.git?branch=next#3322d946804c02ea0b56c821ad81b80388c24fdb"
-dependencies = [
- "game_components_embeddable_game_standard",
- "game_components_interfaces",
- "game_components_metagame",
- "game_components_utilities",
- "interfaces",
- "openzeppelin_access",
- "openzeppelin_interfaces",
- "openzeppelin_introspection",
- "openzeppelin_token",
- "snforge_std",
 ]
 
 [[package]]
 name = "game_components_utilities"
 version = "1.5.1"
-source = "git+https://github.com/Provable-Games/game-components.git?branch=next#3322d946804c02ea0b56c821ad81b80388c24fdb"
+source = "git+https://github.com/Provable-Games/game-components.git#6bcb819582f0e71fa984532d9a68dbf12ad8791d"
 dependencies = [
  "alexandria_encoding",
  "game_components_embeddable_game_standard",
@@ -192,26 +175,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "snforge_scarb_plugin"
-version = "0.55.0"
-source = "git+https://github.com/foundry-rs/starknet-foundry?tag=v0.55.0#8891212a4fe99f1787298042f828ebd4e4abe9a3"
-
-[[package]]
-name = "snforge_std"
-version = "0.55.0"
-source = "git+https://github.com/foundry-rs/starknet-foundry?tag=v0.55.0#8891212a4fe99f1787298042f828ebd4e4abe9a3"
-dependencies = [
- "snforge_scarb_plugin",
-]
-
-[[package]]
-name = "starktycoon"
+name = "stark_tycoon"
 version = "0.1.0"
 dependencies = [
  "dojo",
  "dojo_cairo_test",
  "game_components_embeddable_game_standard",
- "game_components_test_common",
  "game_components_utilities",
  "openzeppelin_introspection",
 ]

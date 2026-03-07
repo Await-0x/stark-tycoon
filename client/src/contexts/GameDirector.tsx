@@ -5,7 +5,6 @@ import type {
   BuildingTranslation,
 } from "@/utils/translation";
 import { useGameStore } from "@/stores/gameStore";
-import { useAccount } from "@starknet-react/core";
 import type { GameAction } from "@/types/game";
 import { BUILDING_SPECS, UPGRADE_SPECS } from "@/types/game";
 import type { Call } from "starknet";
@@ -36,7 +35,6 @@ const GameDirectorContext = createContext<GameDirectorContextType>(
 );
 
 export const GameDirector = ({ children }: PropsWithChildren) => {
-  const { account } = useAccount();
   const {
     setGameId,
     setGameState,

@@ -1,23 +1,19 @@
 [world]
-name = "Starktycoon"
-description = "20-minute deterministic on-chain strategy game built with Dojo."
-cover_uri = "file://assets/cover.png"
-icon_uri = "file://assets/icon.png"
-website = "https://github.com/Provable-Games"
-seed = "starktycoon"
-
-[world.socials]
-github = "https://github.com/Provable-Games"
+name = "StarkTycoon"
+description = "20-minute on-chain tycoon game"
+seed = "StarkTycoon"
 
 [namespace]
-default = "starktycoon"
+default = "ST_0_0_1"
 
 [env]
-rpc_url = "http://localhost:5050/"
-# Set these for your release deployer account.
-# account_address = "0x..."
-# private_key = "0x..."
-# world_address = "0x..."
+rpc_url = "https://api.cartridge.gg/x/starknet/sepolia"
 
 [writers]
-"starktycoon" = ["starktycoon-starktycoon"]
+"ST_0_0_1" = ["ST_0_0_1-starktycoon"]
+
+[init_call_args]
+"ST_0_0_1-starktycoon" = [
+    "0x0248f76e72088853c3fE96CAd8F7f075c9e514B862A6e9a3D5957EA5522eBb6D", # account address
+    "0x0142712722e62a38f9c40fcc904610e1a14c70125876ecaaf25d803556734467", # denshokan address
+]
