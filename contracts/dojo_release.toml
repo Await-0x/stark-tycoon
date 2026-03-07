@@ -1,0 +1,23 @@
+[world]
+name = "Starkcoon"
+description = "30-minute deterministic on-chain strategy game built with Dojo."
+cover_uri = "file://assets/cover.png"
+icon_uri = "file://assets/icon.png"
+website = "https://github.com/Provable-Games"
+seed = "starkcoon"
+
+[world.socials]
+github = "https://github.com/Provable-Games"
+
+[namespace]
+default = "starkcoon"
+
+[env]
+rpc_url = "http://localhost:5050/"
+# Set these for your release deployer account.
+# account_address = "0x..."
+# private_key = "0x..."
+# world_address = "0x..."
+
+[writers]
+"starkcoon" = ["starkcoon-starkcoon"]
