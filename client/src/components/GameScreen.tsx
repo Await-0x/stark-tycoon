@@ -1,27 +1,45 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import SportsEsportsOutlinedIcon from "@mui/icons-material/SportsEsportsOutlined";
-import { useGameMock } from "@/hooks/useGameMock";
+import { useGameDirector } from "@/contexts/GameDirector";
 import { useGameStore } from "@/stores/gameStore";
 import { useController } from "@/contexts/controller";
+import { useGameTimer } from "@/hooks/useGameTimer";
+import { preloadBuildingImages } from "@/utils/buildingImages";
 import { AppShell } from "./AppShell";
 import { ResourceBar } from "./ResourceBar";
 import { GameTimer } from "./GameTimer";
 import { GameBoard } from "./GameBoard";
 import { MarketPanel } from "./MarketPanel";
 import { BuildingDetails } from "./BuildingDetails";
+import { GameEndOverlay } from "./GameEndOverlay";
 
 export function GameScreen() {
   const { account, address, playerName, isPending, openProfile, login } =
     useController();
-  const { mockBuyBuilding, mockUpgradeBuilding } = useGameMock();
+  const { executeGameAction } = useGameDirector();
   const buildings = useGameStore((s) => s.buildings);
+  const gameId = useGameStore((s) => s.gameId);
+  const actionInProgress = useGameStore((s) => s.actionInProgress);
+  const gamePhase = useGameStore((s) => s.gamePhase);
   const selectedPosition = useGameStore((s) => s.selectedPosition);
   const selectedMarketBuildingId = useGameStore((s) => s.selectedMarketBuildingId);
   const setSelectedPosition = useGameStore((s) => s.setSelectedPosition);
   const setSelectedMarketBuildingId = useGameStore((s) => s.setSelectedMarketBuildingId);
+  const { isExpired } = useGameTimer();
+  const submitFiredRef = useRef(false);
+
+  useEffect(() => { preloadBuildingImages(); }, []);
+
+  // Auto-submit score when timer expires
+  useEffect(() => {
+    if (isExpired && gamePhase === "playing" && gameId && !submitFiredRef.current) {
+      submitFiredRef.current = true;
+      executeGameAction({ type: "submit_score", gameId });
+    }
+  }, [isExpired, gamePhase, gameId, executeGameAction]);
 
   const selectedBuilding = useMemo(() => {
     if (selectedPosition === null) return null;
@@ -35,14 +53,20 @@ export function GameScreen() {
       if (building) {
         setSelectedMarketBuildingId(null);
         setSelectedPosition(selectedPosition === positionId ? null : positionId);
-      } else if (selectedMarketBuildingId !== null) {
-        mockBuyBuilding(selectedMarketBuildingId, positionId);
+      } else if (selectedMarketBuildingId !== null && gameId && !actionInProgress) {
+        executeGameAction({
+          type: "buy_building",
+          gameId,
+          buildingId: selectedMarketBuildingId,
+          positionId,
+        });
       }
     },
-    [buildings, selectedPosition, selectedMarketBuildingId, setSelectedPosition, setSelectedMarketBuildingId, mockBuyBuilding]
+    [buildings, selectedPosition, selectedMarketBuildingId, setSelectedPosition, setSelectedMarketBuildingId, gameId, actionInProgress, executeGameAction]
   );
 
   return (
+    <>
     <AppShell
       topBar={
         <Box sx={{ display: "flex", alignItems: "center", width: "100%", gap: 2 }}>
@@ -108,7 +132,16 @@ export function GameScreen() {
           {selectedBuilding && (
             <BuildingDetails
               building={selectedBuilding}
-              onUpgrade={mockUpgradeBuilding}
+              onUpgrade={(positionId: number, upgradeIndex: number) => {
+                if (gameId && !actionInProgress) {
+                  executeGameAction({
+                    type: "upgrade_building",
+                    gameId,
+                    positionId,
+                    upgradeId: upgradeIndex + 1,
+                  });
+                }
+              }}
             />
           )}
         </>
@@ -116,5 +149,7 @@ export function GameScreen() {
       center={<GameBoard onTileClick={handleTileClick} />}
       rightRail={<MarketPanel />}
     />
+    <GameEndOverlay />
+    </>
   );
 }

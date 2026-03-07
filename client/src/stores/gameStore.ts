@@ -14,10 +14,13 @@ interface GameStoreState {
   gameState: GameState | null;
   buildings: Building[];
   actionInProgress: boolean;
+  gamePhase: "playing" | "submitting" | "ended";
+  finalScore: number | null;
 
   // UI state
   selectedPosition: number | null;
   selectedMarketBuildingId: number | null;
+  loadingMarketSlot: number | null;
   notifications: GameNotification[];
 
   // Setters
@@ -29,8 +32,11 @@ interface GameStoreState {
     buildings: Building[] | ((prev: Building[]) => Building[])
   ) => void;
   setActionInProgress: (inProgress: boolean) => void;
+  setGamePhase: (phase: "playing" | "submitting" | "ended") => void;
+  setFinalScore: (score: number | null) => void;
   setSelectedPosition: (pos: number | null) => void;
   setSelectedMarketBuildingId: (id: number | null) => void;
+  setLoadingMarketSlot: (slot: number | null) => void;
   addNotification: (notification: Omit<GameNotification, "id">) => void;
   removeNotification: (id: string) => void;
 
@@ -43,8 +49,11 @@ export const useGameStore = create<GameStoreState>((set) => ({
   gameState: null,
   buildings: [],
   actionInProgress: false,
+  gamePhase: "playing",
+  finalScore: null,
   selectedPosition: null,
   selectedMarketBuildingId: null,
+  loadingMarketSlot: null,
   notifications: [],
 
   setGameId: (id) => set({ gameId: id }),
@@ -61,8 +70,11 @@ export const useGameStore = create<GameStoreState>((set) => ({
     })),
 
   setActionInProgress: (inProgress) => set({ actionInProgress: inProgress }),
+  setGamePhase: (phase) => set({ gamePhase: phase }),
+  setFinalScore: (score) => set({ finalScore: score }),
   setSelectedPosition: (pos) => set({ selectedPosition: pos }),
   setSelectedMarketBuildingId: (id) => set({ selectedMarketBuildingId: id }),
+  setLoadingMarketSlot: (slot) => set({ loadingMarketSlot: slot }),
 
   addNotification: (notification) => {
     const id = `notif-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
@@ -87,8 +99,11 @@ export const useGameStore = create<GameStoreState>((set) => ({
       gameState: null,
       buildings: [],
       actionInProgress: false,
+      gamePhase: "playing",
+      finalScore: null,
       selectedPosition: null,
       selectedMarketBuildingId: null,
+      loadingMarketSlot: null,
       notifications: [],
     }),
 }));

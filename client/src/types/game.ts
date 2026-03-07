@@ -395,6 +395,14 @@ export const UPGRADE_SPECS: Record<number, [UpgradeSpec, UpgradeSpec]> = {
   ],
 };
 
+// ── Token ID Helpers (mirrors Cairo token_id.cairo) ──
+
+export function unpackMintedAt(tokenId: string): number {
+  const packed = BigInt(tokenId);
+  const high = packed >> 128n;
+  return Number(high & ((1n << 35n) - 1n));
+}
+
 // ── Market Helpers (mirrors Cairo market.cairo) ──
 
 export function getMarketSlot(packed: bigint, slot: number): number {

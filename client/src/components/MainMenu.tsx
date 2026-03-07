@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -13,21 +14,68 @@ import SportsEsportsOutlinedIcon from "@mui/icons-material/SportsEsportsOutlined
 import XIcon from "@mui/icons-material/X";
 import SvgIcon from "@mui/material/SvgIcon";
 import { useNavigate } from "react-router-dom";
-import { useSnackbar } from "notistack";
 import { useController } from "@/contexts/controller";
+import { useSystemCalls } from "@/dojo/useSystemCalls";
+import { useGameStore } from "@/stores/gameStore";
+import type { TranslatedGameEvent } from "@/utils/translation";
+import type { GameStateTranslation, BuildingTranslation } from "@/utils/translation";
+import { unpackMintedAt } from "@/types/game";
 import { GlassPanel } from "./GlassPanel";
+import { Leaderboard } from "./Leaderboard";
+
+const isGameStateEvent = (
+  e: TranslatedGameEvent
+): e is GameStateTranslation => e.componentName === "GameState";
+
+const isBuildingEvent = (
+  e: TranslatedGameEvent
+): e is BuildingTranslation => e.componentName === "Building";
 
 export function MainMenu() {
   const navigate = useNavigate();
-  const { enqueueSnackbar } = useSnackbar();
   const { account, address, playerName, isPending, openProfile, login } =
     useController();
+  const { executeStartGame } = useSystemCalls();
+  const { setGameId, setGameState, setBuildings } = useGameStore();
   const [howToPlayOpen, setHowToPlayOpen] = useState(false);
+  const [leaderboardOpen, setLeaderboardOpen] = useState(false);
+  const [isStarting, setIsStarting] = useState(false);
 
   useEffect(() => {
     document.body.classList.add("main-menu");
     return () => document.body.classList.remove("main-menu");
   }, []);
+
+  const handleStartGame = async () => {
+    if (!account) {
+      login();
+      return;
+    }
+
+    setIsStarting(true);
+    const result = await executeStartGame(playerName || undefined);
+
+    if (!result) {
+      setIsStarting(false);
+      return;
+    }
+
+    // Apply game state events to store before navigating
+    const mintedAt = unpackMintedAt(result.gameTokenId);
+    const gameStateEvents = result.events.filter(isGameStateEvent);
+    if (gameStateEvents.length > 0) {
+      const latest = gameStateEvents[gameStateEvents.length - 1];
+      setGameState({ ...latest.state, mintedAt });
+      setGameId(latest.gameId);
+    }
+
+    const buildingEvents = result.events.filter(isBuildingEvent);
+    if (buildingEvents.length > 0) {
+      setBuildings(buildingEvents.map((e) => e.building));
+    }
+
+    navigate(`/play?id=${result.gameTokenId}`);
+  };
 
   return (
     <Box
@@ -92,7 +140,8 @@ export function MainMenu() {
           variant="contained"
           size="large"
           fullWidth
-          onClick={() => navigate("/play")}
+          disabled={isStarting}
+          onClick={handleStartGame}
         >
           Start Game
         </Button>
@@ -110,9 +159,7 @@ export function MainMenu() {
           variant="outlined"
           size="large"
           fullWidth
-          onClick={() =>
-            enqueueSnackbar("Coming soon", { variant: "info" })
-          }
+          onClick={() => setLeaderboardOpen(true)}
         >
           Leaderboard
         </Button>
@@ -265,6 +312,47 @@ export function MainMenu() {
           </Section>
         </DialogContent>
       </Dialog>
+
+      <Leaderboard open={leaderboardOpen} onClose={() => setLeaderboardOpen(false)} />
+
+      {/* Loading overlay while game is being prepared */}
+      {isStarting && (
+        <Box
+          sx={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 1300,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 3,
+            bgcolor: "rgba(7, 10, 18, 0.92)",
+            backdropFilter: "blur(8px)",
+          }}
+        >
+          <CircularProgress
+            size={56}
+            sx={{
+              color: "#42C6FF",
+            }}
+          />
+          <Typography
+            variant="h6"
+            sx={{
+              background: "linear-gradient(135deg, #42C6FF, #8B5CF6)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              fontWeight: 600,
+            }}
+          >
+            Preparing your game...
+          </Typography>
+          <Typography variant="body2" sx={{ opacity: 0.5 }}>
+            Confirming transaction on Starknet
+          </Typography>
+        </Box>
+      )}
     </Box>
   );
 }

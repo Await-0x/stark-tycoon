@@ -39,6 +39,9 @@ importers:
       '@mui/material':
         specifier: ^7.0.2
         version: 7.3.8(@emotion/react@11.14.0(@types/react@18.3.28)(react@18.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.28)(react@18.3.1))(@types/react@18.3.28)(react@18.3.1))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@provable-games/denshokan-sdk':
+        specifier: ^0.1.12
+        version: 0.1.12(react@18.3.1)(starknet@8.5.2)
       '@starknet-react/chains':
         specifier: 5.0.1
         version: 5.0.1
@@ -916,6 +919,18 @@ packages:
 
   '@protobufjs/utf8@1.1.0':
     resolution: {integrity: sha512-Vvn3zZrhQZkkBE8LSuW3em98c0FwgO4nxzv6OdSxPKJIEKY2bGbHn+mhGIPerzI4twdxaP8/0+06HBpwf345Lw==}
+
+  '@provable-games/denshokan-sdk@0.1.12':
+    resolution: {integrity: sha512-eionDS2MD2uiKbzsBWKf4xSiUnMV2RXDzZLN9vyobZPpDU00dlpuwHRKW4iXjTjjAROVoM3DlRyMHXVlchU7gA==}
+    engines: {node: '>=22.0.0'}
+    peerDependencies:
+      react: '>=18.0.0'
+      starknet: '>=9.0.0'
+    peerDependenciesMeta:
+      react:
+        optional: true
+      starknet:
+        optional: true
 
   '@remix-run/router@1.15.1':
     resolution: {integrity: sha512-zcU0gM3z+3iqj8UX45AmWY810l3oUmXM7uH4dt5xtzvMhRtYVhKGOmgOd1877dOPPepfCjUv57w+syamWIYe7w==}
@@ -5210,6 +5225,11 @@ snapshots:
   '@protobufjs/pool@1.1.0': {}
 
   '@protobufjs/utf8@1.1.0': {}
+
+  '@provable-games/denshokan-sdk@0.1.12(react@18.3.1)(starknet@8.5.2)':
+    optionalDependencies:
+      react: 18.3.1
+      starknet: 8.5.2
 
   '@remix-run/router@1.15.1': {}
 

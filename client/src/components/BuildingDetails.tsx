@@ -12,6 +12,7 @@ import { BUILDING_SPECS, UPGRADE_SPECS } from "@/types/game";
 import type { Building, BuildingSpec, UpgradeSpec } from "@/types/game";
 import { getBuildingImage } from "@/utils/buildingImages";
 import { useResourceTicker } from "@/hooks/useResourceTicker";
+import { useGameStore } from "@/stores/gameStore";
 import { GlassPanel } from "./GlassPanel";
 
 const IC = 13;
@@ -55,6 +56,7 @@ export function BuildingDetails({ building, onUpgrade }: BuildingDetailsProps) {
   const spec = BUILDING_SPECS[building.buildingId];
   const upgrades = UPGRADE_SPECS[building.buildingId];
   const resources = useResourceTicker();
+  const actionInProgress = useGameStore((s) => s.actionInProgress);
 
   if (!spec) return null;
 
@@ -176,7 +178,8 @@ export function BuildingDetails({ building, onUpgrade }: BuildingDetailsProps) {
                   <Button
                     variant="contained"
                     size="small"
-                    disabled={!canAfford}
+                    disabled={!canAfford || actionInProgress}
+                    loading={actionInProgress}
                     onClick={() => onUpgrade(building.positionId, idx)}
                     sx={{
                       fontSize: "0.75rem",

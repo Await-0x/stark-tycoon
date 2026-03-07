@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import CircularProgress from "@mui/material/CircularProgress";
 import AccountBalanceRounded from "@mui/icons-material/AccountBalanceRounded";
 import GroupRounded from "@mui/icons-material/GroupRounded";
 import ScienceRounded from "@mui/icons-material/ScienceRounded";
@@ -197,6 +198,7 @@ export function MarketPanel() {
   const selectedMarketBuildingId = useGameStore((s) => s.selectedMarketBuildingId);
   const setSelectedMarketBuildingId = useGameStore((s) => s.setSelectedMarketBuildingId);
   const setSelectedPosition = useGameStore((s) => s.setSelectedPosition);
+  const loadingMarketSlot = useGameStore((s) => s.loadingMarketSlot);
   const resources = useResourceTicker();
 
   const marketBuildings = useMemo(() => {
@@ -222,6 +224,27 @@ export function MarketPanel() {
       </Typography>
 
       {marketBuildings.map((spec, idx) => {
+        if (idx === loadingMarketSlot) {
+          return (
+            <GlassPanel
+              key={`loading-${idx}`}
+              sx={{
+                p: 0,
+                borderRadius: "10px",
+                overflow: "hidden",
+                height: 80,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background: "linear-gradient(90deg, rgba(110,190,255,0.04) 25%, rgba(110,190,255,0.1) 50%, rgba(110,190,255,0.04) 75%)",
+                backgroundSize: "200% 100%",
+                animation: "shimmer 1.5s infinite linear",
+              }}
+            >
+              <CircularProgress size={24} sx={{ color: "rgba(110, 190, 255, 0.4)" }} />
+            </GlassPanel>
+          );
+        }
         const canAfford =
           resources.capital >= spec.capitalCost && resources.users >= spec.usersCost;
         return (

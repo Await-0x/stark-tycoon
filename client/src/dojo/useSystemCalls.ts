@@ -1,11 +1,12 @@
 import { useDynamicConnector } from "@/contexts/starknet";
+import type { Building, GameState } from "@/types/game";
 import { VRF_PROVIDER } from "@/utils/networkConfig";
 import type { TranslatedGameEvent } from "@/utils/translation";
 import { translateGameEvent } from "@/utils/translation";
 import { useAccount } from "@starknet-react/core";
 import { useSnackbar } from "notistack";
 import type { Call } from "starknet";
-import { CallData } from "starknet";
+import { CallData, hash } from "starknet";
 
 export const useSystemCalls = () => {
   const { account } = useAccount();
@@ -155,20 +156,142 @@ export const useSystemCalls = () => {
     ];
   };
 
-  // ── Read-only: get_game_state ──
-  const getGameState = (gameId: string): Call => ({
-    contractAddress: GAME_ADDRESS,
-    entrypoint: "get_game_state",
-    calldata: CallData.compile([gameId]),
-  });
+  // ── Read-only: fetch game state via raw RPC ──
+  const fetchGameState = async (
+    gameId: string
+  ): Promise<{ gameState: GameState; buildings: Building[] } | null> => {
+    try {
+      const response = await fetch(currentNetworkConfig.rpcUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          method: "starknet_call",
+          params: [
+            {
+              contract_address: GAME_ADDRESS,
+              entry_point_selector: hash.getSelectorFromName("get_game_state"),
+              calldata: [gameId],
+            },
+            "latest",
+          ],
+          id: 0,
+        }),
+      });
+
+      const data = await response.json();
+      if (!data?.result || data.result.length < 16) return null;
+
+      const r = data.result;
+      const hex = (v: string) => parseInt(v, 16);
+
+      const gameState: GameState = {
+        mintedAt: 0,
+        capital: hex(r[1]),
+        users: hex(r[2]),
+        research: hex(r[3]),
+        transactions: hex(r[4]),
+        capitalProduction: hex(r[5]),
+        usersProduction: hex(r[6]),
+        researchProduction: hex(r[7]),
+        transactionsProduction: hex(r[8]),
+        usersMultiplier: hex(r[9]),
+        researchMultiplier: hex(r[10]),
+        txMultiplier: hex(r[11]),
+        gameTime: hex(r[12]),
+        marketPacked: BigInt(r[14]),
+      };
+
+      const buildingsCount = hex(r[15]);
+      const buildings: Building[] = [];
+      for (let i = 0; i < buildingsCount; i++) {
+        const base = 16 + i * 4;
+        buildings.push({
+          gameId: r[base],
+          positionId: hex(r[base + 1]),
+          buildingId: hex(r[base + 2]),
+          upgradeLevel: hex(r[base + 3]),
+        });
+      }
+
+      return { gameState, buildings };
+    } catch (error) {
+      console.error("Error fetching game state:", error);
+      return null;
+    }
+  };
+
+  // ── Start game and extract token ID from receipt ──
+  const executeStartGame = async (
+    playerName?: string
+  ): Promise<{ events: TranslatedGameEvent[]; gameTokenId: string } | null> => {
+    if (!account) return null;
+
+    try {
+      const calls = startGame(playerName);
+      const tx = await account.execute(calls);
+      const receipt = await waitForTransaction(tx.transaction_hash, 0);
+
+      if (receipt.execution_status === "REVERTED") {
+        enqueueSnackbar("Transaction reverted", { variant: "error" });
+        return null;
+      }
+
+      // Extract game token ID: find event emitted by account, last data element
+      const events = receipt.events || [];
+      const tokenMetadataEvent = events.find(
+        (event: any) => event.from_address === account.address
+      ) as { data: string[]; from_address: string } | undefined;
+      const gameTokenId = tokenMetadataEvent
+        ? tokenMetadataEvent.data[tokenMetadataEvent.data.length - 1]
+        : undefined;
+
+      if (!gameTokenId) {
+        enqueueSnackbar("Failed to get game ID", { variant: "error" });
+        return null;
+      }
+
+      const translatedEvents = (receipt.events || [])
+        .map((event) =>
+          translateGameEvent(
+            event as Parameters<typeof translateGameEvent>[0],
+            account.address
+          )
+        )
+        .flat()
+        .filter(Boolean) as TranslatedGameEvent[];
+
+      return { events: translatedEvents, gameTokenId };
+    } catch (error) {
+      console.error("Error starting game:", error);
+
+      const executionError =
+        typeof error === "object" &&
+          error !== null &&
+          "data" in error &&
+          typeof (error as { data?: unknown }).data === "object" &&
+          (error as { data?: unknown }).data !== null &&
+          "execution_error" in
+          (error as { data: Record<string, unknown> }).data
+          ? (error as { data: { execution_error?: unknown } }).data
+            .execution_error
+          : undefined;
+
+      enqueueSnackbar(parseExecutionError(executionError), {
+        variant: "error",
+      });
+      return null;
+    }
+  };
 
   return {
     executeAction,
+    executeStartGame,
     startGame,
     buyBuilding,
     upgradeBuilding,
     submitScore,
-    getGameState,
+    fetchGameState,
   };
 };
 

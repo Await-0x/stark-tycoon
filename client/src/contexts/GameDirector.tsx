@@ -6,7 +6,7 @@ import type {
 } from "@/utils/translation";
 import { useGameStore } from "@/stores/gameStore";
 import type { GameAction } from "@/types/game";
-import { BUILDING_SPECS, UPGRADE_SPECS } from "@/types/game";
+import { BUILDING_SPECS, UPGRADE_SPECS, GAME_DURATION, getMarketBuildings, unpackMintedAt } from "@/types/game";
 import type { Call } from "starknet";
 import {
   createContext,
@@ -15,6 +15,7 @@ import {
   useReducer,
   type PropsWithChildren,
 } from "react";
+import { useSearchParams } from "react-router-dom";
 
 // ── Type guards ──
 const isGameStateEvent = (
@@ -36,24 +37,64 @@ const GameDirectorContext = createContext<GameDirectorContextType>(
 
 export const GameDirector = ({ children }: PropsWithChildren) => {
   const {
+    gameId,
     setGameId,
     setGameState,
     setBuildings,
     setActionInProgress,
+    setGamePhase,
+    setFinalScore,
+    setLoadingMarketSlot,
+    setSelectedMarketBuildingId,
+    setSelectedPosition,
     addNotification,
   } = useGameStore();
   const {
     executeAction,
+    fetchGameState,
     startGame,
     buyBuilding,
     upgradeBuilding,
     submitScore,
   } = useSystemCalls();
+  const [searchParams] = useSearchParams();
 
   const [actionFailed, setActionFailed] = useReducer(
     (x: number) => x + 1,
     0
   );
+
+  // Set gameId from URL params if not already set
+  useEffect(() => {
+    const urlGameId = searchParams.get("id");
+    if (urlGameId && !gameId) {
+      setGameId(urlGameId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+  // Recover game state from RPC on page refresh
+  useEffect(() => {
+    const currentGameState = useGameStore.getState().gameState;
+    if (!gameId || currentGameState) return;
+
+    const recover = async () => {
+      const result = await fetchGameState(gameId);
+      if (!result) return;
+
+      const mintedAt = unpackMintedAt(gameId);
+      setGameState({ ...result.gameState, mintedAt });
+      setBuildings(result.buildings);
+
+      if (result.gameState.gameTime >= GAME_DURATION) {
+        setGamePhase("ended");
+        setFinalScore(result.gameState.transactions);
+      }
+    };
+
+    recover();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gameId]);
 
   // Reset UI loading on failure
   useEffect(() => {
@@ -66,7 +107,8 @@ export const GameDirector = ({ children }: PropsWithChildren) => {
     const gameStateEvents = events.filter(isGameStateEvent);
     if (gameStateEvents.length > 0) {
       const latest = gameStateEvents[gameStateEvents.length - 1];
-      setGameState(latest.state);
+      const existingMintedAt = useGameStore.getState().gameState?.mintedAt ?? 0;
+      setGameState({ ...latest.state, mintedAt: existingMintedAt });
       setGameId(latest.gameId);
     }
 
@@ -94,6 +136,8 @@ export const GameDirector = ({ children }: PropsWithChildren) => {
   // ── Central action dispatcher ──
   const executeGameAction = async (action: GameAction): Promise<boolean> => {
     const txs: Call[] = [];
+    const prevGameState = useGameStore.getState().gameState;
+    const prevBuildings = useGameStore.getState().buildings;
 
     switch (action.type) {
       case "start_game":
@@ -115,6 +159,24 @@ export const GameDirector = ({ children }: PropsWithChildren) => {
             };
           });
         }
+        // Optimistic: place building on board
+        setBuildings((prev) => [
+          ...prev,
+          { gameId: action.gameId, positionId: action.positionId, buildingId: action.buildingId, upgradeLevel: 0 },
+        ]);
+
+        // Clear selections
+        setSelectedMarketBuildingId(null);
+        setSelectedPosition(null);
+
+        // Mark purchased market slot as loading (can't predict VRF replacement)
+        const currentState = useGameStore.getState().gameState;
+        if (currentState) {
+          const marketIds = getMarketBuildings(currentState.marketPacked);
+          const slotIndex = marketIds.indexOf(action.buildingId);
+          if (slotIndex >= 0) setLoadingMarketSlot(slotIndex);
+        }
+
         txs.push(
           ...buyBuilding(action.gameId, action.buildingId, action.positionId)
         );
@@ -144,6 +206,15 @@ export const GameDirector = ({ children }: PropsWithChildren) => {
             });
           }
         }
+        // Optimistic: bump upgrade level
+        setBuildings((prev) =>
+          prev.map((b) =>
+            b.gameId === action.gameId && b.positionId === action.positionId
+              ? { ...b, upgradeLevel: action.upgradeId }
+              : b
+          )
+        );
+
         txs.push(
           ...upgradeBuilding(action.gameId, action.positionId, action.upgradeId)
         );
@@ -152,6 +223,7 @@ export const GameDirector = ({ children }: PropsWithChildren) => {
 
       case "submit_score":
         setActionInProgress(true);
+        setGamePhase("submitting");
         txs.push(...submitScore(action.gameId));
         break;
     }
@@ -159,14 +231,17 @@ export const GameDirector = ({ children }: PropsWithChildren) => {
     const events = await executeAction(txs, setActionFailed);
 
     if (!events) {
-      // Revert optimistic updates by not applying — store still has stale state
-      // The next get_game_state call will correct it
+      if (prevGameState) setGameState(prevGameState);
+      setBuildings(prevBuildings);
+      setLoadingMarketSlot(null);
+      if (action.type === "submit_score") setGamePhase("playing");
       setActionFailed();
       addNotification({ type: "error", message: "Action failed" });
       return false;
     }
 
     applyGameStateEvents(events);
+    setLoadingMarketSlot(null);
     setActionInProgress(false);
 
     if (action.type === "start_game") {
@@ -180,6 +255,9 @@ export const GameDirector = ({ children }: PropsWithChildren) => {
     } else if (action.type === "upgrade_building") {
       addNotification({ type: "success", message: "Upgrade applied!" });
     } else if (action.type === "submit_score") {
+      const finalState = useGameStore.getState().gameState;
+      setFinalScore(finalState?.transactions ?? 0);
+      setGamePhase("ended");
       addNotification({ type: "success", message: "Score submitted!" });
     }
 
