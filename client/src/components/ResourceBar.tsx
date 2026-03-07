@@ -24,11 +24,11 @@ function getProductionRate(
     case "capital":
       return `+${gameState.capitalProduction}/s`;
     case "users":
-      return `+${Math.floor((gameState.usersProduction * (10000 + gameState.usersMultiplier)) / 10000)}/s`;
+      return `+${Math.floor((gameState.usersProduction * (100 + gameState.usersMultiplier)) / 100)}/s`;
     case "research":
-      return `+${Math.floor((gameState.researchProduction * (10000 + gameState.researchMultiplier)) / 10000)}/s`;
+      return `+${Math.floor((gameState.researchProduction * (100 + gameState.researchMultiplier)) / 100)}/s`;
     case "transactions":
-      return `+${(gameState.transactionsProduction * (10000 + gameState.txMultiplier) / (10000 * 10)).toFixed(1)}/s`;
+      return `+${Math.floor((gameState.transactionsProduction * (100 + gameState.txMultiplier)) / 100)}/s`;
     default:
       return "+0/s";
   }

@@ -30,7 +30,7 @@ pub struct UpgradeSpec {
 pub fn building_spec(building_id: u8) -> BuildingSpec {
     // ── CAPITAL BUILDINGS (1-5) ──
     if building_id == 1 {
-        // Treasury Desk
+        // Treasury
         BuildingSpec {
             capital_cost: 200,
             users_cost: 0,
@@ -56,7 +56,7 @@ pub fn building_spec(building_id: u8) -> BuildingSpec {
             tx_multiplier: 0,
         }
     } else if building_id == 3 {
-        // Venture Office
+        // Venture Fund
         BuildingSpec {
             capital_cost: 1200,
             users_cost: 0,
@@ -82,7 +82,7 @@ pub fn building_spec(building_id: u8) -> BuildingSpec {
             tx_multiplier: 0,
         }
     } else if building_id == 5 {
-        // Capital Markets Hub
+        // Capital Markets
         BuildingSpec {
             capital_cost: 4500,
             users_cost: 0,
@@ -96,7 +96,7 @@ pub fn building_spec(building_id: u8) -> BuildingSpec {
         }
     } // ── USER BUILDINGS (6-9) ──
     else if building_id == 6 {
-        // Wallet Gateway
+        // Account Portal
         BuildingSpec {
             capital_cost: 250,
             users_cost: 0,
@@ -122,7 +122,7 @@ pub fn building_spec(building_id: u8) -> BuildingSpec {
             tx_multiplier: 0,
         }
     } else if building_id == 8 {
-        // Community Platform
+        // Community Hub
         BuildingSpec {
             capital_cost: 1800,
             users_cost: 0,
@@ -135,7 +135,7 @@ pub fn building_spec(building_id: u8) -> BuildingSpec {
             tx_multiplier: 0,
         }
     } else if building_id == 9 {
-        // Developer Relations Center
+        // Developer Relations
         BuildingSpec {
             capital_cost: 1500,
             users_cost: 0,
@@ -162,7 +162,7 @@ pub fn building_spec(building_id: u8) -> BuildingSpec {
             tx_multiplier: 0,
         }
     } else if building_id == 11 {
-        // Cairo Facility
+        // Cairo Lab
         BuildingSpec {
             capital_cost: 1000,
             users_cost: 0,
@@ -175,7 +175,7 @@ pub fn building_spec(building_id: u8) -> BuildingSpec {
             tx_multiplier: 0,
         }
     } else if building_id == 12 {
-        // ZK Research Complex
+        // ZK Research
         BuildingSpec {
             capital_cost: 3000,
             users_cost: 0,
@@ -189,7 +189,7 @@ pub fn building_spec(building_id: u8) -> BuildingSpec {
         }
     } // ── TRANSACTION BUILDINGS (13-17) — require Users at purchase ──
     else if building_id == 13 {
-        // Social Network — 1.0 TPS
+        // NFT Marketplace — 1.0 TPS
         BuildingSpec {
             capital_cost: 1200,
             users_cost: 150,
@@ -202,7 +202,7 @@ pub fn building_spec(building_id: u8) -> BuildingSpec {
             tx_multiplier: 0,
         }
     } else if building_id == 14 {
-        // NFT Marketplace — 2.2 TPS
+        // Game Studio — 2.2 TPS
         BuildingSpec {
             capital_cost: 2500,
             users_cost: 300,
@@ -215,7 +215,7 @@ pub fn building_spec(building_id: u8) -> BuildingSpec {
             tx_multiplier: 0,
         }
     } else if building_id == 15 {
-        // DeFi Exchange — 3.8 TPS
+        // Decentralized Exchange — 3.8 TPS
         BuildingSpec {
             capital_cost: 4000,
             users_cost: 500,
@@ -228,7 +228,7 @@ pub fn building_spec(building_id: u8) -> BuildingSpec {
             tx_multiplier: 0,
         }
     } else if building_id == 16 {
-        // Gaming Studio — 5.0 TPS
+        // Social Platform — 5.0 TPS
         BuildingSpec {
             capital_cost: 5000,
             users_cost: 700,
@@ -241,7 +241,7 @@ pub fn building_spec(building_id: u8) -> BuildingSpec {
             tx_multiplier: 0,
         }
     } else if building_id == 17 {
-        // Layer 3 Network — 7.0 TPS
+        // Appchain Network — 7.0 TPS
         BuildingSpec {
             capital_cost: 7000,
             users_cost: 1000,
@@ -255,7 +255,7 @@ pub fn building_spec(building_id: u8) -> BuildingSpec {
         }
     } // ── GLOBAL BUILDINGS (18-20) —-
     else if building_id == 18 {
-        // Network Effect Engine — +20% Users production
+        // Starknet Foundation — +20% Users production
         BuildingSpec {
             capital_cost: 5000,
             users_cost: 0,
@@ -281,7 +281,7 @@ pub fn building_spec(building_id: u8) -> BuildingSpec {
             tx_multiplier: 0,
         }
     } else if building_id == 20 {
-        // Sequencer Cluster — +20% Transactions production
+        // Sequencer — +20% Transactions production
         BuildingSpec {
             capital_cost: 8000,
             users_cost: 0,
@@ -321,7 +321,7 @@ pub fn building_spec(building_id: u8) -> BuildingSpec {
             tx_multiplier: 0,
         }
     } else if building_id == 23 {
-        // Wallet Ecosystem — +25 Users/sec
+        // Wallet Provider — +25 Users/sec
         BuildingSpec {
             capital_cost: 2800,
             users_cost: 0,
@@ -334,20 +334,20 @@ pub fn building_spec(building_id: u8) -> BuildingSpec {
             tx_multiplier: 0,
         }
     } else if building_id == 24 {
-        // DeFi Aggregator — 4.5 TPS
+        // Arcade Machine — 1 TPS
         BuildingSpec {
-            capital_cost: 5000,
-            users_cost: 600,
+            capital_cost: 1000,
+            users_cost: 100,
             capital_production: 0,
             users_production: 0,
             research_production: 0,
-            tx_production: 45,
+            tx_production: 1,
             users_multiplier: 0,
             research_multiplier: 0,
             tx_multiplier: 0,
         }
     } else if building_id == 25 {
-        // On-Chain Identity Service — +15 Users/sec
+        // Identity Protocol — +15 Users/sec
         BuildingSpec {
             capital_cost: 3200,
             users_cost: 0,
@@ -373,7 +373,7 @@ pub fn building_spec(building_id: u8) -> BuildingSpec {
 pub fn upgrade_spec(building_id: u8, upgrade_id: u8) -> UpgradeSpec {
     // ── CAPITAL BUILDINGS (1-5) ──
     if building_id == 1 {
-        // Treasury Desk
+        // Treasury
         if upgrade_id == 1 {
             // Financial Automation
             UpgradeSpec {
@@ -414,7 +414,7 @@ pub fn upgrade_spec(building_id: u8, upgrade_id: u8) -> UpgradeSpec {
                 tx_multiplier: 0,
             }
         } else {
-            // Strategic LPs
+            // Anchor Investors
             UpgradeSpec {
                 research_cost: 500,
                 capital_production: 6,
@@ -427,7 +427,7 @@ pub fn upgrade_spec(building_id: u8, upgrade_id: u8) -> UpgradeSpec {
             }
         }
     } else if building_id == 3 {
-        // Venture Office
+        // Venture Fund
         if upgrade_id == 1 {
             // Portfolio Scaling
             UpgradeSpec {
@@ -456,7 +456,7 @@ pub fn upgrade_spec(building_id: u8, upgrade_id: u8) -> UpgradeSpec {
     } else if building_id == 4 {
         // Trading Floor
         if upgrade_id == 1 {
-            // High Frequency Bots
+            // Market Making Bots
             UpgradeSpec {
                 research_cost: 800,
                 capital_production: 8,
@@ -481,7 +481,7 @@ pub fn upgrade_spec(building_id: u8, upgrade_id: u8) -> UpgradeSpec {
             }
         }
     } else if building_id == 5 {
-        // Capital Markets Hub
+        // Capital Markets
         if upgrade_id == 1 {
             // Institutional Liquidity
             UpgradeSpec {
@@ -509,7 +509,7 @@ pub fn upgrade_spec(building_id: u8, upgrade_id: u8) -> UpgradeSpec {
         }
     } // ── USER BUILDINGS (6-9) ──
     else if building_id == 6 {
-        // Wallet Gateway
+        // Account Portal
         if upgrade_id == 1 {
             // Burner Wallets
             UpgradeSpec {
@@ -563,7 +563,7 @@ pub fn upgrade_spec(building_id: u8, upgrade_id: u8) -> UpgradeSpec {
             }
         }
     } else if building_id == 8 {
-        // Community Platform
+        // Community Hub
         if upgrade_id == 1 {
             // Ambassador Program
             UpgradeSpec {
@@ -590,7 +590,7 @@ pub fn upgrade_spec(building_id: u8, upgrade_id: u8) -> UpgradeSpec {
             }
         }
     } else if building_id == 9 {
-        // Developer Relations Center
+        // Developer Relations
         if upgrade_id == 1 {
             // Dev Grants
             UpgradeSpec {
@@ -645,7 +645,7 @@ pub fn upgrade_spec(building_id: u8, upgrade_id: u8) -> UpgradeSpec {
             }
         }
     } else if building_id == 11 {
-        // Cairo Facility
+        // Cairo Lab
         if upgrade_id == 1 {
             // Starknet OS Improvements
             UpgradeSpec {
@@ -659,7 +659,7 @@ pub fn upgrade_spec(building_id: u8, upgrade_id: u8) -> UpgradeSpec {
                 tx_multiplier: 0,
             }
         } else {
-            // Native AA Extensions
+            // Smart Account Modules
             UpgradeSpec {
                 research_cost: 900,
                 capital_production: 0,
@@ -672,7 +672,7 @@ pub fn upgrade_spec(building_id: u8, upgrade_id: u8) -> UpgradeSpec {
             }
         }
     } else if building_id == 12 {
-        // ZK Research Complex
+        // ZK Research
         if upgrade_id == 1 {
             // Recursive Proof Systems
             UpgradeSpec {
@@ -727,7 +727,7 @@ pub fn upgrade_spec(building_id: u8, upgrade_id: u8) -> UpgradeSpec {
             }
         }
     } else if building_id == 14 {
-        // Gaming Studio
+        // Game Studio
         if upgrade_id == 1 {
             // Session Keys — +1.5 TPS
             UpgradeSpec {
@@ -754,7 +754,7 @@ pub fn upgrade_spec(building_id: u8, upgrade_id: u8) -> UpgradeSpec {
             }
         }
     } else if building_id == 15 {
-        // DeFi Exchange
+        // Decentralized Exchange
         if upgrade_id == 1 {
             // On-Chain Orderbook — +2.0 TPS
             UpgradeSpec {
@@ -781,7 +781,7 @@ pub fn upgrade_spec(building_id: u8, upgrade_id: u8) -> UpgradeSpec {
             }
         }
     } else if building_id == 16 {
-        // Social Network
+        // Social Platform
         if upgrade_id == 1 {
             // Social Graph Protocol — +3.0 TPS
             UpgradeSpec {
@@ -808,7 +808,7 @@ pub fn upgrade_spec(building_id: u8, upgrade_id: u8) -> UpgradeSpec {
             }
         }
     } else if building_id == 17 {
-        // Layer 3 Network
+        // Appchain Network
         if upgrade_id == 1 {
             // App-Specific Rollups — +4.0 TPS
             UpgradeSpec {
@@ -836,9 +836,9 @@ pub fn upgrade_spec(building_id: u8, upgrade_id: u8) -> UpgradeSpec {
         }
     } // ── GLOBAL BUILDINGS (18-20) — multiplier upgrades ──
     else if building_id == 18 {
-        // Network Effect Engine
+        // Starknet Foundation
         if upgrade_id == 1 {
-            // Viral Loops — +10% Users
+            // Ecosystem Incentives — +10% Users
             UpgradeSpec {
                 research_cost: 2000,
                 capital_production: 0,
@@ -850,7 +850,7 @@ pub fn upgrade_spec(building_id: u8, upgrade_id: u8) -> UpgradeSpec {
                 tx_multiplier: 0,
             }
         } else {
-            // Ecosystem Incentives — +15% Users
+            // Strategic Grants — +15% Users
             UpgradeSpec {
                 research_cost: 4000,
                 capital_production: 0,
@@ -890,7 +890,7 @@ pub fn upgrade_spec(building_id: u8, upgrade_id: u8) -> UpgradeSpec {
             }
         }
     } else if building_id == 20 {
-        // Sequencer Cluster
+        // Sequencer
         if upgrade_id == 1 {
             // Parallel Execution — +10% Transactions
             UpgradeSpec {
@@ -904,7 +904,7 @@ pub fn upgrade_spec(building_id: u8, upgrade_id: u8) -> UpgradeSpec {
                 tx_multiplier: 5,
             }
         } else {
-            // Block Compression — +15% Transactions
+            // State Diff Compression — +15% Transactions
             UpgradeSpec {
                 research_cost: 6000,
                 capital_production: 0,
@@ -918,9 +918,9 @@ pub fn upgrade_spec(building_id: u8, upgrade_id: u8) -> UpgradeSpec {
         }
     } // ── ADDITIONAL BUILDINGS (21-25) ──
     else if building_id == 21 {
-        // Starknet Bridge Hub
+        // Starknet Bridge
         if upgrade_id == 1 {
-            // Liquidity Mining Campaign
+            // Shared Liquidity Network
             UpgradeSpec {
                 research_cost: 1200,
                 capital_production: 0,
@@ -945,7 +945,7 @@ pub fn upgrade_spec(building_id: u8, upgrade_id: u8) -> UpgradeSpec {
             }
         }
     } else if building_id == 22 {
-        // Infrastructure RPC Provider
+        // RPC Provider
         if upgrade_id == 1 {
             // High Throughput RPC
             UpgradeSpec {
@@ -972,7 +972,7 @@ pub fn upgrade_spec(building_id: u8, upgrade_id: u8) -> UpgradeSpec {
             }
         }
     } else if building_id == 23 {
-        // Wallet Ecosystem
+        // Wallet Provider
         if upgrade_id == 1 {
             // Embedded Wallet SDK
             UpgradeSpec {
@@ -999,11 +999,23 @@ pub fn upgrade_spec(building_id: u8, upgrade_id: u8) -> UpgradeSpec {
             }
         }
     } else if building_id == 24 {
-        // DeFi Aggregator
+        // Arcade Machine
         if upgrade_id == 1 {
-            // DEX Routing — +3.0 TPS
+            // Traditional Payments — +2.0 TPS
             UpgradeSpec {
                 research_cost: 1800,
+                capital_production: 0,
+                users_production: 0,
+                research_production: 0,
+                tx_production: 2,
+                users_multiplier: 0,
+                research_multiplier: 0,
+                tx_multiplier: 0,
+            }
+        } else {
+            // No Token Onboarding — +3.0 TPS
+            UpgradeSpec {
+                research_cost: 3500,
                 capital_production: 0,
                 users_production: 0,
                 research_production: 0,
@@ -1012,21 +1024,9 @@ pub fn upgrade_spec(building_id: u8, upgrade_id: u8) -> UpgradeSpec {
                 research_multiplier: 0,
                 tx_multiplier: 0,
             }
-        } else {
-            // MEV Protection Layer — +4.0 TPS
-            UpgradeSpec {
-                research_cost: 3500,
-                capital_production: 0,
-                users_production: 0,
-                research_production: 0,
-                tx_production: 4,
-                users_multiplier: 0,
-                research_multiplier: 0,
-                tx_multiplier: 0,
-            }
         }
     } else if building_id == 25 {
-        // On-Chain Identity Service
+        // Identity Protocol
         if upgrade_id == 1 {
             // Human Verification Layer
             UpgradeSpec {

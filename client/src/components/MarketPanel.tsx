@@ -6,7 +6,7 @@ import GroupRounded from "@mui/icons-material/GroupRounded";
 import ScienceRounded from "@mui/icons-material/ScienceRounded";
 import SwapHorizRounded from "@mui/icons-material/SwapHorizRounded";
 import TrendingUpRounded from "@mui/icons-material/TrendingUpRounded";
-import { BUILDING_SPECS, UPGRADE_SPECS, getMarketBuildings, TX_SCALE } from "@/types/game";
+import { BUILDING_SPECS, UPGRADE_SPECS, getMarketBuildings } from "@/types/game";
 import type { BuildingSpec, UpgradeSpec } from "@/types/game";
 import { getBuildingImage } from "@/utils/buildingImages";
 import { useGameStore } from "@/stores/gameStore";
@@ -35,13 +35,13 @@ function prodStats(spec: BuildingSpec | UpgradeSpec): { icon: React.ReactElement
   if (spec.researchProduction > 0)
     items.push({ icon: <ScienceRounded sx={{ fontSize: IC }} />, value: `+${spec.researchProduction}`, color: "#8B5CF6" });
   if (spec.txProduction > 0)
-    items.push({ icon: <SwapHorizRounded sx={{ fontSize: IC }} />, value: `+${(spec.txProduction / TX_SCALE).toFixed(1)}`, color: "#4ADE80" });
+    items.push({ icon: <SwapHorizRounded sx={{ fontSize: IC }} />, value: `+${spec.txProduction}`, color: "#4ADE80" });
   if (spec.usersMultiplier > 0)
-    items.push({ icon: <TrendingUpRounded sx={{ fontSize: IC }} />, value: `U+${(spec.usersMultiplier / 100).toFixed(0)}%`, color: "#42C6FF" });
+    items.push({ icon: <TrendingUpRounded sx={{ fontSize: IC }} />, value: `U+${spec.usersMultiplier}%`, color: "#42C6FF" });
   if (spec.researchMultiplier > 0)
-    items.push({ icon: <TrendingUpRounded sx={{ fontSize: IC }} />, value: `R+${(spec.researchMultiplier / 100).toFixed(0)}%`, color: "#8B5CF6" });
+    items.push({ icon: <TrendingUpRounded sx={{ fontSize: IC }} />, value: `R+${spec.researchMultiplier}%`, color: "#8B5CF6" });
   if (spec.txMultiplier > 0)
-    items.push({ icon: <TrendingUpRounded sx={{ fontSize: IC }} />, value: `TX+${(spec.txMultiplier / 100).toFixed(0)}%`, color: "#4ADE80" });
+    items.push({ icon: <TrendingUpRounded sx={{ fontSize: IC }} />, value: `TX+${spec.txMultiplier}%`, color: "#4ADE80" });
   return items;
 }
 

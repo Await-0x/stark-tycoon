@@ -1,7 +1,7 @@
 use crate::models::{Building, Game};
 
 #[starknet::interface]
-pub trait IStarkcoonActions<T> {
+pub trait IStarktycoonActions<T> {
     fn start_game(ref self: T, player_name: Option<felt252>);
     fn buy_building(ref self: T, game_id: felt252, building_id: u8, position_id: u8);
     fn upgrade_building(ref self: T, game_id: felt252, position_id: u8, upgrade_id: u8);
@@ -10,7 +10,7 @@ pub trait IStarkcoonActions<T> {
 }
 
 #[dojo::contract]
-pub mod starkcoon {
+pub mod starktycoon {
     use dojo::model::ModelStorage;
     use game_components_embeddable_game_standard::minigame::extensions::settings::interface::IMinigameSettings;
     use game_components_embeddable_game_standard::minigame::interface::IMinigameTokenData;
@@ -75,7 +75,7 @@ pub mod starkcoon {
                 "Provable Games",
                 "Provable Games",
                 "Tycoon",
-                "https://starktycoon.gg/favicon.png",
+                "https://stark-tycoon.vercel.app/favicon.png",
                 Option::None,
                 Option::None,
                 Option::None,
@@ -84,12 +84,12 @@ pub mod starkcoon {
                 denshokan_address,
                 Option::None,
                 Option::None,
-                1
+                1,
             );
     }
 
     #[abi(embed_v0)]
-    impl StarkcoonActionsImpl of super::IStarkcoonActions<ContractState> {
+    impl StarktycoonActionsImpl of super::IStarktycoonActions<ContractState> {
         fn start_game(ref self: ContractState, player_name: Option<felt252>) {
             let mut world = self.world_default();
             let current_time = get_block_timestamp();
@@ -287,7 +287,7 @@ pub mod starkcoon {
     #[generate_trait]
     impl InternalImpl of InternalTrait {
         fn world_default(self: @ContractState) -> dojo::world::WorldStorage {
-            self.world(@"starkcoon")
+            self.world(@"starktycoon")
         }
     }
 

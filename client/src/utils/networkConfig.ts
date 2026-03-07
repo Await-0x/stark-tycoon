@@ -31,19 +31,19 @@ export interface NetworkConfig {
 const NETWORKS = {
   SN_MAIN: {
     chainId: ChainId.SN_MAIN,
-    slot: "starkcoon",
+    slot: "starktycoon",
     rpcUrl: "https://api.cartridge.gg/x/starknet/mainnet/rpc/v0_9",
-    torii: "https://api.cartridge.gg/x/starkcoon-torii/torii",
-    apiUrl: "https://api.cartridge.gg/x/starkcoon",
-    wsUrl: "wss://api.cartridge.gg/x/starkcoon/ws",
+    torii: "https://api.cartridge.gg/x/starktycoon-torii/torii",
+    apiUrl: "https://api.cartridge.gg/x/starktycoon",
+    wsUrl: "wss://api.cartridge.gg/x/starktycoon/ws",
   },
   SN_SEPOLIA: {
     chainId: ChainId.SN_SEPOLIA,
-    slot: "starkcoon-sepolia",
+    slot: "starktycoon-sepolia",
     rpcUrl: "https://api.cartridge.gg/x/starknet/sepolia/rpc/v0_9",
-    torii: "https://api.cartridge.gg/x/starkcoon-sepolia-torii/torii",
-    apiUrl: "https://api.cartridge.gg/x/starkcoon-sepolia",
-    wsUrl: "wss://api.cartridge.gg/x/starkcoon-sepolia/ws",
+    torii: "https://api.cartridge.gg/x/starktycoon-sepolia-torii/torii",
+    apiUrl: "https://api.cartridge.gg/x/starktycoon-sepolia",
+    wsUrl: "wss://api.cartridge.gg/x/starktycoon-sepolia/ws",
   },
 };
 
@@ -51,7 +51,7 @@ function buildPolicies(gameAddress: string) {
   return {
     contracts: {
       [gameAddress]: {
-        name: "Starkcoon",
+        name: "Starktycoon",
         description: "Stark Tycoon game contract",
         methods: [
           {
@@ -103,7 +103,7 @@ export function getNetworkConfig(
   return {
     chainId: network.chainId,
     slot: network.slot,
-    preset: "starkcoon",
+    preset: "starktycoon",
     policies,
     rpcUrl: network.rpcUrl,
     toriiUrl: network.torii,
