@@ -1,0 +1,442 @@
+// ── Game Constants ──
+
+export const BOARD_SIZE = 25;
+export const GAME_DURATION = 1200;
+export const MARKET_SIZE = 5;
+export const TOTAL_BUILDINGS = 25;
+export const START_CAPITAL = 200;
+export const START_CAPITAL_PRODUCTION = 1;
+export const TX_SCALE = 10;
+
+// ── Resource Types ──
+
+export type ResourceType = "capital" | "users" | "research" | "transactions";
+
+// ── Building Categories ──
+
+export type BuildingCategory =
+  | "capital"
+  | "users"
+  | "research"
+  | "transactions"
+  | "global"
+  | "additional";
+
+// ── Building Spec (mirrors Cairo BuildingSpec) ──
+
+export interface BuildingSpec {
+  id: number;
+  name: string;
+  category: BuildingCategory;
+  capitalCost: number;
+  usersCost: number;
+  capitalProduction: number;
+  usersProduction: number;
+  researchProduction: number;
+  txProduction: number; // 10x scaled
+  usersMultiplier: number; // basis points
+  researchMultiplier: number;
+  txMultiplier: number;
+}
+
+// ── Upgrade Spec (mirrors Cairo UpgradeSpec) ──
+
+export interface UpgradeSpec {
+  name: string;
+  researchCost: number;
+  capitalProduction: number;
+  usersProduction: number;
+  researchProduction: number;
+  txProduction: number; // 10x scaled
+  usersMultiplier: number;
+  researchMultiplier: number;
+  txMultiplier: number;
+}
+
+// ── Building on the board ──
+
+export interface Building {
+  gameId: string;
+  positionId: number;
+  buildingId: number;
+  upgradeLevel: number;
+}
+
+// ── Game State (mirrors Cairo GameState) ──
+
+export interface GameState {
+  mintedAt: number;
+  capital: number;
+  users: number;
+  research: number;
+  transactions: number;
+  capitalProduction: number;
+  usersProduction: number;
+  researchProduction: number;
+  transactionsProduction: number;
+  usersMultiplier: number;
+  researchMultiplier: number;
+  txMultiplier: number;
+  gameTime: number;
+  marketPacked: bigint;
+}
+
+// ── Game Actions ──
+
+export interface StartGameAction {
+  type: "start_game";
+  playerName?: string;
+}
+
+export interface BuyBuildingAction {
+  type: "buy_building";
+  gameId: string;
+  buildingId: number;
+  positionId: number;
+}
+
+export interface UpgradeBuildingAction {
+  type: "upgrade_building";
+  gameId: string;
+  positionId: number;
+  upgradeId: number;
+}
+
+export interface SubmitScoreAction {
+  type: "submit_score";
+  gameId: string;
+}
+
+export type GameAction =
+  | StartGameAction
+  | BuyBuildingAction
+  | UpgradeBuildingAction
+  | SubmitScoreAction;
+
+// ── Building Specs (all 25 buildings) ──
+
+export const BUILDING_SPECS: Record<number, BuildingSpec> = {
+  // Capital Buildings (1-5)
+  1: {
+    id: 1, name: "Treasury Desk", category: "capital",
+    capitalCost: 200, usersCost: 0,
+    capitalProduction: 3, usersProduction: 0, researchProduction: 0, txProduction: 0,
+    usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0,
+  },
+  2: {
+    id: 2, name: "Angel Syndicate", category: "capital",
+    capitalCost: 500, usersCost: 0,
+    capitalProduction: 6, usersProduction: 0, researchProduction: 0, txProduction: 0,
+    usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0,
+  },
+  3: {
+    id: 3, name: "Venture Office", category: "capital",
+    capitalCost: 1200, usersCost: 0,
+    capitalProduction: 10, usersProduction: 0, researchProduction: 0, txProduction: 0,
+    usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0,
+  },
+  4: {
+    id: 4, name: "Trading Floor", category: "capital",
+    capitalCost: 2500, usersCost: 0,
+    capitalProduction: 16, usersProduction: 0, researchProduction: 0, txProduction: 0,
+    usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0,
+  },
+  5: {
+    id: 5, name: "Capital Markets Hub", category: "capital",
+    capitalCost: 4500, usersCost: 0,
+    capitalProduction: 22, usersProduction: 0, researchProduction: 0, txProduction: 0,
+    usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0,
+  },
+
+  // User Buildings (6-9)
+  6: {
+    id: 6, name: "Wallet Gateway", category: "users",
+    capitalCost: 250, usersCost: 0,
+    capitalProduction: 0, usersProduction: 8, researchProduction: 0, txProduction: 0,
+    usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0,
+  },
+  7: {
+    id: 7, name: "Growth Hub", category: "users",
+    capitalCost: 800, usersCost: 0,
+    capitalProduction: 0, usersProduction: 18, researchProduction: 0, txProduction: 0,
+    usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0,
+  },
+  8: {
+    id: 8, name: "Community Platform", category: "users",
+    capitalCost: 1800, usersCost: 0,
+    capitalProduction: 0, usersProduction: 35, researchProduction: 0, txProduction: 0,
+    usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0,
+  },
+  9: {
+    id: 9, name: "Developer Relations Center", category: "users",
+    capitalCost: 1500, usersCost: 0,
+    capitalProduction: 0, usersProduction: 22, researchProduction: 0, txProduction: 0,
+    usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0,
+  },
+
+  // Research Buildings (10-12)
+  10: {
+    id: 10, name: "R&D Lab", category: "research",
+    capitalCost: 300, usersCost: 0,
+    capitalProduction: 0, usersProduction: 0, researchProduction: 5, txProduction: 0,
+    usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0,
+  },
+  11: {
+    id: 11, name: "Cairo Facility", category: "research",
+    capitalCost: 1000, usersCost: 0,
+    capitalProduction: 0, usersProduction: 0, researchProduction: 12, txProduction: 0,
+    usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0,
+  },
+  12: {
+    id: 12, name: "ZK Research Complex", category: "research",
+    capitalCost: 3000, usersCost: 0,
+    capitalProduction: 0, usersProduction: 0, researchProduction: 25, txProduction: 0,
+    usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0,
+  },
+
+  // Transaction Buildings (13-17)
+  13: {
+    id: 13, name: "NFT Marketplace", category: "transactions",
+    capitalCost: 1200, usersCost: 150,
+    capitalProduction: 0, usersProduction: 0, researchProduction: 0, txProduction: 10,
+    usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0,
+  },
+  14: {
+    id: 14, name: "Gaming Studio", category: "transactions",
+    capitalCost: 2500, usersCost: 300,
+    capitalProduction: 0, usersProduction: 0, researchProduction: 0, txProduction: 22,
+    usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0,
+  },
+  15: {
+    id: 15, name: "DeFi Exchange", category: "transactions",
+    capitalCost: 4000, usersCost: 500,
+    capitalProduction: 0, usersProduction: 0, researchProduction: 0, txProduction: 38,
+    usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0,
+  },
+  16: {
+    id: 16, name: "Social Network", category: "transactions",
+    capitalCost: 5000, usersCost: 700,
+    capitalProduction: 0, usersProduction: 0, researchProduction: 0, txProduction: 50,
+    usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0,
+  },
+  17: {
+    id: 17, name: "Layer 3 Network", category: "transactions",
+    capitalCost: 7000, usersCost: 1000,
+    capitalProduction: 0, usersProduction: 0, researchProduction: 0, txProduction: 70,
+    usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0,
+  },
+
+  // Global Multiplier Buildings (18-20)
+  18: {
+    id: 18, name: "Network Effect Engine", category: "global",
+    capitalCost: 5000, usersCost: 0,
+    capitalProduction: 0, usersProduction: 0, researchProduction: 0, txProduction: 0,
+    usersMultiplier: 2000, researchMultiplier: 0, txMultiplier: 0,
+  },
+  19: {
+    id: 19, name: "Protocol Institute", category: "global",
+    capitalCost: 6000, usersCost: 0,
+    capitalProduction: 0, usersProduction: 0, researchProduction: 0, txProduction: 0,
+    usersMultiplier: 0, researchMultiplier: 2000, txMultiplier: 0,
+  },
+  20: {
+    id: 20, name: "Sequencer Cluster", category: "global",
+    capitalCost: 8000, usersCost: 0,
+    capitalProduction: 0, usersProduction: 0, researchProduction: 0, txProduction: 0,
+    usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 2000,
+  },
+
+  // Additional Buildings (21-25)
+  21: {
+    id: 21, name: "Starknet Bridge Hub", category: "additional",
+    capitalCost: 3500, usersCost: 0,
+    capitalProduction: 0, usersProduction: 20, researchProduction: 0, txProduction: 0,
+    usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0,
+  },
+  22: {
+    id: 22, name: "Infrastructure RPC Provider", category: "additional",
+    capitalCost: 2200, usersCost: 0,
+    capitalProduction: 0, usersProduction: 0, researchProduction: 12, txProduction: 0,
+    usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0,
+  },
+  23: {
+    id: 23, name: "Wallet Ecosystem", category: "additional",
+    capitalCost: 2800, usersCost: 0,
+    capitalProduction: 0, usersProduction: 25, researchProduction: 0, txProduction: 0,
+    usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0,
+  },
+  24: {
+    id: 24, name: "DeFi Aggregator", category: "additional",
+    capitalCost: 5000, usersCost: 600,
+    capitalProduction: 0, usersProduction: 0, researchProduction: 0, txProduction: 45,
+    usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0,
+  },
+  25: {
+    id: 25, name: "On-Chain Identity Service", category: "additional",
+    capitalCost: 3200, usersCost: 0,
+    capitalProduction: 0, usersProduction: 15, researchProduction: 0, txProduction: 0,
+    usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0,
+  },
+};
+
+// ── Upgrade Specs (2 upgrades per building) ──
+
+export const UPGRADE_SPECS: Record<number, [UpgradeSpec, UpgradeSpec]> = {
+  // Capital Buildings
+  1: [
+    { name: "Financial Automation", researchCost: 100, capitalProduction: 2, usersProduction: 0, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+    { name: "Yield Optimization", researchCost: 300, capitalProduction: 3, usersProduction: 0, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+  ],
+  2: [
+    { name: "Syndicated Funding", researchCost: 200, capitalProduction: 4, usersProduction: 0, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+    { name: "Strategic LPs", researchCost: 500, capitalProduction: 6, usersProduction: 0, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+  ],
+  3: [
+    { name: "Portfolio Scaling", researchCost: 400, capitalProduction: 6, usersProduction: 0, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+    { name: "Secondary Markets", researchCost: 900, capitalProduction: 10, usersProduction: 0, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+  ],
+  4: [
+    { name: "High Frequency Bots", researchCost: 800, capitalProduction: 8, usersProduction: 0, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+    { name: "Cross-Chain Arbitrage", researchCost: 1500, capitalProduction: 12, usersProduction: 0, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+  ],
+  5: [
+    { name: "Institutional Liquidity", researchCost: 1200, capitalProduction: 12, usersProduction: 0, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+    { name: "Structured Products", researchCost: 2500, capitalProduction: 18, usersProduction: 0, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+  ],
+
+  // User Buildings
+  6: [
+    { name: "Burner Wallets", researchCost: 200, capitalProduction: 0, usersProduction: 6, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+    { name: "Account Abstraction", researchCost: 400, capitalProduction: 0, usersProduction: 10, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+  ],
+  7: [
+    { name: "Referral Engine", researchCost: 300, capitalProduction: 0, usersProduction: 10, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+    { name: "Regional Expansion", researchCost: 700, capitalProduction: 0, usersProduction: 15, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+  ],
+  8: [
+    { name: "Ambassador Program", researchCost: 600, capitalProduction: 0, usersProduction: 20, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+    { name: "Global Campaign", researchCost: 1200, capitalProduction: 0, usersProduction: 30, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+  ],
+  9: [
+    { name: "Dev Grants", researchCost: 500, capitalProduction: 0, usersProduction: 12, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+    { name: "Hackathon Series", researchCost: 1000, capitalProduction: 0, usersProduction: 20, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+  ],
+
+  // Research Buildings
+  10: [
+    { name: "Cairo Compiler Optimizations", researchCost: 150, capitalProduction: 0, usersProduction: 0, researchProduction: 4, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+    { name: "Proving Improvements", researchCost: 500, capitalProduction: 0, usersProduction: 0, researchProduction: 8, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+  ],
+  11: [
+    { name: "Starknet OS Improvements", researchCost: 400, capitalProduction: 0, usersProduction: 0, researchProduction: 8, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+    { name: "Native AA Extensions", researchCost: 900, capitalProduction: 0, usersProduction: 0, researchProduction: 14, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+  ],
+  12: [
+    { name: "Recursive Proof Systems", researchCost: 1000, capitalProduction: 0, usersProduction: 0, researchProduction: 15, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+    { name: "Proof Compression", researchCost: 2500, capitalProduction: 0, usersProduction: 0, researchProduction: 25, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+  ],
+
+  // Transaction Buildings
+  13: [
+    { name: "Royalty Engine", researchCost: 500, capitalProduction: 0, usersProduction: 0, researchProduction: 0, txProduction: 8, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+    { name: "Batch Minting", researchCost: 1000, capitalProduction: 0, usersProduction: 0, researchProduction: 0, txProduction: 12, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+  ],
+  14: [
+    { name: "Session Keys", researchCost: 800, capitalProduction: 0, usersProduction: 0, researchProduction: 0, txProduction: 15, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+    { name: "Paymaster Integration", researchCost: 1500, capitalProduction: 0, usersProduction: 0, researchProduction: 0, txProduction: 20, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+  ],
+  15: [
+    { name: "On-Chain Orderbook", researchCost: 1200, capitalProduction: 0, usersProduction: 0, researchProduction: 0, txProduction: 20, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+    { name: "Liquidity Aggregator", researchCost: 2500, capitalProduction: 0, usersProduction: 0, researchProduction: 0, txProduction: 30, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+  ],
+  16: [
+    { name: "Social Graph Protocol", researchCost: 1500, capitalProduction: 0, usersProduction: 0, researchProduction: 0, txProduction: 30, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+    { name: "Creator Monetization", researchCost: 3000, capitalProduction: 0, usersProduction: 0, researchProduction: 0, txProduction: 40, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+  ],
+  17: [
+    { name: "App-Specific Rollups", researchCost: 2000, capitalProduction: 0, usersProduction: 0, researchProduction: 0, txProduction: 40, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+    { name: "Custom DA Layer", researchCost: 4000, capitalProduction: 0, usersProduction: 0, researchProduction: 0, txProduction: 60, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+  ],
+
+  // Global Multiplier Buildings
+  18: [
+    { name: "Viral Loops", researchCost: 2000, capitalProduction: 0, usersProduction: 0, researchProduction: 0, txProduction: 0, usersMultiplier: 1000, researchMultiplier: 0, txMultiplier: 0 },
+    { name: "Ecosystem Incentives", researchCost: 4000, capitalProduction: 0, usersProduction: 0, researchProduction: 0, txProduction: 0, usersMultiplier: 1500, researchMultiplier: 0, txMultiplier: 0 },
+  ],
+  19: [
+    { name: "Core Protocol Grants", researchCost: 2500, capitalProduction: 0, usersProduction: 0, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 1000, txMultiplier: 0 },
+    { name: "Ecosystem Standards", researchCost: 5000, capitalProduction: 0, usersProduction: 0, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 1500, txMultiplier: 0 },
+  ],
+  20: [
+    { name: "Parallel Execution", researchCost: 3000, capitalProduction: 0, usersProduction: 0, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 1000 },
+    { name: "Block Compression", researchCost: 6000, capitalProduction: 0, usersProduction: 0, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 1500 },
+  ],
+
+  // Additional Buildings
+  21: [
+    { name: "Liquidity Mining Campaign", researchCost: 1200, capitalProduction: 0, usersProduction: 15, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+    { name: "Fast Withdrawal System", researchCost: 2800, capitalProduction: 0, usersProduction: 25, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+  ],
+  22: [
+    { name: "High Throughput RPC", researchCost: 800, capitalProduction: 0, usersProduction: 0, researchProduction: 10, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+    { name: "Geo-Distributed Nodes", researchCost: 2000, capitalProduction: 0, usersProduction: 0, researchProduction: 18, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+  ],
+  23: [
+    { name: "Embedded Wallet SDK", researchCost: 900, capitalProduction: 0, usersProduction: 18, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+    { name: "Smart Account Recovery", researchCost: 2200, capitalProduction: 0, usersProduction: 28, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+  ],
+  24: [
+    { name: "DEX Routing", researchCost: 1800, capitalProduction: 0, usersProduction: 0, researchProduction: 0, txProduction: 30, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+    { name: "MEV Protection Layer", researchCost: 3500, capitalProduction: 0, usersProduction: 0, researchProduction: 0, txProduction: 40, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+  ],
+  25: [
+    { name: "Human Verification Layer", researchCost: 1200, capitalProduction: 0, usersProduction: 12, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+    { name: "Universal Profile System", researchCost: 2800, capitalProduction: 0, usersProduction: 20, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+  ],
+};
+
+// ── Market Helpers (mirrors Cairo market.cairo) ──
+
+export function getMarketSlot(packed: bigint, slot: number): number {
+  const divisor = 32n ** BigInt(slot);
+  return Number((packed / divisor) % 32n);
+}
+
+export function getMarketBuildings(packed: bigint, marketSize: number = MARKET_SIZE): number[] {
+  const buildings: number[] = [];
+  for (let i = 0; i < marketSize; i++) {
+    buildings.push(getMarketSlot(packed, i));
+  }
+  return buildings;
+}
+
+// ── Production Interpolation (mirrors Cairo tick_production) ──
+
+export function interpolateResources(
+  state: GameState,
+  currentTimestamp: number
+): { capital: number; users: number; research: number; transactions: number } {
+  const elapsed = Math.min(
+    Math.max(0, currentTimestamp - state.mintedAt - state.gameTime),
+    GAME_DURATION - state.gameTime
+  );
+
+  const capital = state.capital + state.capitalProduction * elapsed;
+  const users =
+    state.users +
+    Math.floor(
+      (state.usersProduction * (10000 + state.usersMultiplier) * elapsed) / 10000
+    );
+  const research =
+    state.research +
+    Math.floor(
+      (state.researchProduction * (10000 + state.researchMultiplier) * elapsed) / 10000
+    );
+  const transactions =
+    state.transactions +
+    Math.floor(
+      (state.transactionsProduction * (10000 + state.txMultiplier) * elapsed) / (10000 * TX_SCALE)
+    );
+
+  return { capital, users, research, transactions };
+}

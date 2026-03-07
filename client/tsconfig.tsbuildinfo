@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/contexts/gamedirector.tsx","./src/contexts/controller.tsx","./src/contexts/starknet.tsx","./src/dojo/usesystemcalls.ts","./src/stores/gamestore.ts","./src/types/game.ts","./src/utils/networkconfig.ts","./src/utils/themes.ts","./src/utils/translation.ts"],"version":"5.9.3"}
