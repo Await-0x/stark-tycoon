@@ -1,6 +1,6 @@
 import { useDynamicConnector } from "@/contexts/starknet";
 import type { Building, GameState } from "@/types/game";
-import { VRF_PROVIDER } from "@/utils/networkConfig";
+import { GAME_ADDRESS as RESOLVED_GAME_ADDRESS, VRF_PROVIDER, getNetworkConfig } from "@/utils/networkConfig";
 import type { TranslatedGameEvent } from "@/utils/translation";
 import { translateGameEvent } from "@/utils/translation";
 import { useAccount } from "@starknet-react/core";
@@ -156,71 +156,6 @@ export const useSystemCalls = () => {
     ];
   };
 
-  // ── Read-only: fetch game state via raw RPC ──
-  const fetchGameState = async (
-    gameId: string
-  ): Promise<{ gameState: GameState; buildings: Building[] } | null> => {
-    try {
-      const response = await fetch(currentNetworkConfig.rpcUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          jsonrpc: "2.0",
-          method: "starknet_call",
-          params: [
-            {
-              contract_address: GAME_ADDRESS,
-              entry_point_selector: hash.getSelectorFromName("get_game_state"),
-              calldata: [gameId],
-            },
-            "latest",
-          ],
-          id: 0,
-        }),
-      });
-
-      const data = await response.json();
-      if (!data?.result || data.result.length < 16) return null;
-
-      const r = data.result;
-      const hex = (v: string) => parseInt(v, 16);
-
-      const gameState: GameState = {
-        mintedAt: 0,
-        capital: hex(r[1]),
-        users: hex(r[2]),
-        research: hex(r[3]),
-        transactions: hex(r[4]),
-        capitalProduction: hex(r[5]),
-        usersProduction: hex(r[6]),
-        researchProduction: hex(r[7]),
-        transactionsProduction: hex(r[8]),
-        usersMultiplier: hex(r[9]),
-        researchMultiplier: hex(r[10]),
-        txMultiplier: hex(r[11]),
-        gameTime: hex(r[12]),
-        marketPacked: BigInt(r[14]),
-      };
-
-      const buildingsCount = hex(r[15]);
-      const buildings: Building[] = [];
-      for (let i = 0; i < buildingsCount; i++) {
-        const base = 16 + i * 4;
-        buildings.push({
-          gameId: r[base],
-          positionId: hex(r[base + 1]),
-          buildingId: hex(r[base + 2]),
-          upgradeLevel: hex(r[base + 3]),
-        });
-      }
-
-      return { gameState, buildings };
-    } catch (error) {
-      console.error("Error fetching game state:", error);
-      return null;
-    }
-  };
-
   // ── Start game and extract token ID from receipt ──
   const executeStartGame = async (
     playerName?: string
@@ -291,7 +226,6 @@ export const useSystemCalls = () => {
     buyBuilding,
     upgradeBuilding,
     submitScore,
-    fetchGameState,
   };
 };
 
@@ -300,6 +234,73 @@ type TransactionReceiptLike = {
   actual_fee?: { amount?: string | number | bigint } | string | number | bigint;
   events?: unknown[];
 };
+
+// ── Standalone read-only RPC call (no wallet needed) ──
+const _rpcUrl = getNetworkConfig().rpcUrl;
+
+export async function fetchGameState(
+  gameId: string
+): Promise<{ gameState: GameState; buildings: Building[] } | null> {
+  try {
+    const response = await fetch(_rpcUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        method: "starknet_call",
+        params: [
+          {
+            contract_address: RESOLVED_GAME_ADDRESS,
+            entry_point_selector: hash.getSelectorFromName("get_game_state"),
+            calldata: [gameId],
+          },
+          "latest",
+        ],
+        id: 0,
+      }),
+    });
+
+    const data = await response.json();
+    if (!data?.result || data.result.length < 16) return null;
+
+    const r = data.result;
+    const hex = (v: string) => parseInt(v, 16);
+
+    const gameState: GameState = {
+      mintedAt: 0,
+      capital: hex(r[1]),
+      users: hex(r[2]),
+      research: hex(r[3]),
+      transactions: hex(r[4]),
+      capitalProduction: hex(r[5]),
+      usersProduction: hex(r[6]),
+      researchProduction: hex(r[7]),
+      transactionsProduction: hex(r[8]),
+      usersMultiplier: hex(r[9]),
+      researchMultiplier: hex(r[10]),
+      txMultiplier: hex(r[11]),
+      gameTime: hex(r[12]),
+      marketPacked: BigInt(r[14]),
+    };
+
+    const buildingsCount = hex(r[15]);
+    const buildings: Building[] = [];
+    for (let i = 0; i < buildingsCount; i++) {
+      const base = 16 + i * 4;
+      buildings.push({
+        gameId: r[base],
+        positionId: hex(r[base + 1]),
+        buildingId: hex(r[base + 2]),
+        upgradeLevel: hex(r[base + 3]),
+      });
+    }
+
+    return { gameState, buildings };
+  } catch (error) {
+    console.error("Error fetching game state:", error);
+    return null;
+  }
+}
 
 const parseExecutionError = (error: unknown): string => {
   const fallback = "Error executing action";

@@ -53,7 +53,7 @@ export function DynamicConnectorProvider({ children }: PropsWithChildren) {
         provider={jsonRpcProvider({ rpc })}
         connectors={[cartridgeController as any]}
         explorer={voyager}
-        autoConnect
+        autoConnect={false}
       >
         {children}
       </StarknetConfig>

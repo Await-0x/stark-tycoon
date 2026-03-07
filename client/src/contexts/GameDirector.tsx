@@ -1,4 +1,4 @@
-import { useSystemCalls } from "@/dojo/useSystemCalls";
+import { useSystemCalls, fetchGameState } from "@/dojo/useSystemCalls";
 import type { TranslatedGameEvent } from "@/utils/translation";
 import type {
   GameStateTranslation,
@@ -51,7 +51,6 @@ export const GameDirector = ({ children }: PropsWithChildren) => {
   } = useGameStore();
   const {
     executeAction,
-    fetchGameState,
     startGame,
     buyBuilding,
     upgradeBuilding,
