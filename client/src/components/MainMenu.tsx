@@ -301,7 +301,9 @@ export function MainMenu() {
             Place buildings on a 4×4 grid (16 slots). Each tile may have a
             random bonus (extra production or instant resources). Pick from
             randomly available buildings in the market — each purchase
-            refreshes that slot with a new random option.
+            refreshes that slot with a new random option. You can also
+            refresh the entire market: the first refresh is free, then each
+            subsequent refresh costs 500 more Capital (500, 1000, 1500...).
           </Section>
 
           <Section title="Building Types">
