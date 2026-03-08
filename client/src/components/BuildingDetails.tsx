@@ -39,11 +39,11 @@ function prodStats(spec: BuildingSpec | UpgradeSpec): { icon: React.ReactElement
   if (spec.txProduction > 0)
     items.push({ icon: <SwapHorizRounded sx={{ fontSize: IC }} />, value: `+${spec.txProduction}/s`, color: "#4ADE80" });
   if (spec.usersMultiplier > 0)
-    items.push({ icon: <TrendingUpRounded sx={{ fontSize: IC }} />, value: `U+${spec.usersMultiplier}%`, color: "#42C6FF" });
+    items.push({ icon: <GroupRounded sx={{ fontSize: IC }} />, value: `+${spec.usersMultiplier}%`, color: "#42C6FF" });
   if (spec.researchMultiplier > 0)
-    items.push({ icon: <TrendingUpRounded sx={{ fontSize: IC }} />, value: `R+${spec.researchMultiplier}%`, color: "#8B5CF6" });
+    items.push({ icon: <ScienceRounded sx={{ fontSize: IC }} />, value: `+${spec.researchMultiplier}%`, color: "#8B5CF6" });
   if (spec.txMultiplier > 0)
-    items.push({ icon: <TrendingUpRounded sx={{ fontSize: IC }} />, value: `TX+${spec.txMultiplier}%`, color: "#4ADE80" });
+    items.push({ icon: <SwapHorizRounded sx={{ fontSize: IC }} />, value: `+${spec.txMultiplier}%`, color: "#4ADE80" });
   return items;
 }
 
