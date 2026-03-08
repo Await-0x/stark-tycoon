@@ -264,7 +264,7 @@ export const BUILDING_SPECS: Record<number, BuildingSpec> = {
   // Additional Buildings (21-25)
   21: {
     id: 21, name: "Starknet Bridge", category: "additional",
-    capitalCost: 3500, usersCost: 0,
+    capitalCost: 1200, usersCost: 0,
     capitalProduction: 0, usersProduction: 6, researchProduction: 0, txProduction: 0,
     usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0,
   },
@@ -276,7 +276,7 @@ export const BUILDING_SPECS: Record<number, BuildingSpec> = {
   },
   23: {
     id: 23, name: "Wallet Provider", category: "additional",
-    capitalCost: 2800, usersCost: 0,
+    capitalCost: 1600, usersCost: 0,
     capitalProduction: 0, usersProduction: 8, researchProduction: 0, txProduction: 0,
     usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0,
   },

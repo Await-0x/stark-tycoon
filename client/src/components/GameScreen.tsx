@@ -11,7 +11,7 @@ import { useGameDirector } from "@/contexts/GameDirector";
 import { useGameStore } from "@/stores/gameStore";
 import { useController } from "@/contexts/controller";
 import { useGameTimer } from "@/hooks/useGameTimer";
-import { GAME_DURATION } from "@/types/game";
+import { BUILDING_SPECS, GAME_DURATION, getMarketBuildings } from "@/types/game";
 import { preloadBuildingImages } from "@/utils/buildingImages";
 import { AppShell } from "./AppShell";
 import { ResourceBar } from "./ResourceBar";
@@ -34,9 +34,9 @@ export function GameScreen() {
   const actionInProgress = useGameStore((s) => s.actionInProgress);
   const gamePhase = useGameStore((s) => s.gamePhase);
   const selectedPosition = useGameStore((s) => s.selectedPosition);
-  const selectedMarketBuildingId = useGameStore((s) => s.selectedMarketBuildingId);
+  const selectedMarketSlot = useGameStore((s) => s.selectedMarketSlot);
   const setSelectedPosition = useGameStore((s) => s.setSelectedPosition);
-  const setSelectedMarketBuildingId = useGameStore((s) => s.setSelectedMarketBuildingId);
+  const setSelectedMarketSlot = useGameStore((s) => s.setSelectedMarketSlot);
   const { isExpired } = useGameTimer();
   const submitFiredRef = useRef(false);
 
@@ -72,12 +72,21 @@ export function GameScreen() {
     }
   }, [isMobile, selectedBuilding]);
 
+  const marketBuildings = useMemo(() => {
+    if (!gameState) return [];
+    return getMarketBuildings(gameState.marketPacked);
+  }, [gameState]);
+
+  const selectedMarketBuildingId = selectedMarketSlot !== null
+    ? BUILDING_SPECS[marketBuildings[selectedMarketSlot]]?.id ?? null
+    : null;
+
   // Mobile: auto-close market drawer when a building is picked
   useEffect(() => {
-    if (isMobile && selectedMarketBuildingId !== null) {
+    if (isMobile && selectedMarketSlot !== null) {
       setMarketOpen(false);
     }
-  }, [isMobile, selectedMarketBuildingId]);
+  }, [isMobile, selectedMarketSlot]);
 
   const handleDetailsClose = useCallback(() => {
     setDetailsOpen(false);
@@ -89,7 +98,7 @@ export function GameScreen() {
       const building = buildings.find((b) => b.positionId === positionId && b.buildingId > 0);
 
       if (building) {
-        setSelectedMarketBuildingId(null);
+        setSelectedMarketSlot(null);
         setSelectedPosition(selectedPosition === positionId ? null : positionId);
       } else if (selectedMarketBuildingId !== null && gameId) {
         executeRef.current({
@@ -100,7 +109,7 @@ export function GameScreen() {
         });
       }
     },
-    [buildings, selectedPosition, selectedMarketBuildingId, gameId]
+    [buildings, selectedPosition, selectedMarketBuildingId, selectedMarketSlot, gameId]
   );
 
   const handleUpgrade = useCallback(
@@ -240,12 +249,12 @@ export function GameScreen() {
               }}
             >
               <Button
-                variant={selectedMarketBuildingId !== null ? "outlined" : "contained"}
+                variant={selectedMarketSlot !== null ? "outlined" : "contained"}
                 onClick={() => setMarketOpen(true)}
                 startIcon={<StorefrontRounded />}
                 sx={{ borderRadius: "10px", px: 3, fontWeight: 700 }}
               >
-                {selectedMarketBuildingId !== null ? "Change Selection" : "Market"}
+                {selectedMarketSlot !== null ? "Change Selection" : "Market"}
               </Button>
             </Box>
           </Box>

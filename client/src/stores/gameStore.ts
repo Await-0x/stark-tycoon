@@ -20,7 +20,7 @@ interface GameStoreState {
 
   // UI state
   selectedPosition: number | null;
-  selectedMarketBuildingId: number | null;
+  selectedMarketSlot: number | null;
   loadingMarketSlot: number | null;
   loadingMarketRefresh: boolean;
   notifications: GameNotification[];
@@ -38,7 +38,7 @@ interface GameStoreState {
   setGamePhase: (phase: "playing" | "submitting" | "ended") => void;
   setFinalScore: (score: number | null) => void;
   setSelectedPosition: (pos: number | null) => void;
-  setSelectedMarketBuildingId: (id: number | null) => void;
+  setSelectedMarketSlot: (slot: number | null) => void;
   setLoadingMarketSlot: (slot: number | null) => void;
   setLoadingMarketRefresh: (loading: boolean) => void;
   addNotification: (notification: Omit<GameNotification, "id">) => void;
@@ -57,7 +57,7 @@ export const useGameStore = create<GameStoreState>((set) => ({
   gamePhase: "playing",
   finalScore: null,
   selectedPosition: null,
-  selectedMarketBuildingId: null,
+  selectedMarketSlot: null,
   loadingMarketSlot: null,
   loadingMarketRefresh: false,
   notifications: [],
@@ -80,7 +80,7 @@ export const useGameStore = create<GameStoreState>((set) => ({
   setGamePhase: (phase) => set({ gamePhase: phase }),
   setFinalScore: (score) => set({ finalScore: score }),
   setSelectedPosition: (pos) => set({ selectedPosition: pos }),
-  setSelectedMarketBuildingId: (id) => set({ selectedMarketBuildingId: id }),
+  setSelectedMarketSlot: (slot) => set({ selectedMarketSlot: slot }),
   setLoadingMarketSlot: (slot) => set({ loadingMarketSlot: slot }),
   setLoadingMarketRefresh: (loading) => set({ loadingMarketRefresh: loading }),
 
@@ -111,7 +111,7 @@ export const useGameStore = create<GameStoreState>((set) => ({
       gamePhase: "playing",
       finalScore: null,
       selectedPosition: null,
-      selectedMarketBuildingId: null,
+      selectedMarketSlot: null,
       loadingMarketSlot: null,
       loadingMarketRefresh: false,
       notifications: [],

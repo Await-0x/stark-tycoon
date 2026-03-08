@@ -18,7 +18,7 @@ interface GameBoardProps {
 export function GameBoard({ onTileClick }: GameBoardProps) {
   const buildings = useGameStore((s) => s.buildings);
   const selectedPosition = useGameStore((s) => s.selectedPosition);
-  const selectedMarketBuildingId = useGameStore((s) => s.selectedMarketBuildingId);
+  const selectedMarketSlot = useGameStore((s) => s.selectedMarketSlot);
   const boardSeed = useGameStore((s) => s.boardSeed);
   const [tooltipTile, setTooltipTile] = useState<number | null>(null);
 
@@ -37,20 +37,20 @@ export function GameBoard({ onTileClick }: GameBoardProps) {
 
   // Clear tooltip when a market building is selected
   useEffect(() => {
-    if (selectedMarketBuildingId !== null) setTooltipTile(null);
-  }, [selectedMarketBuildingId]);
+    if (selectedMarketSlot !== null) setTooltipTile(null);
+  }, [selectedMarketSlot]);
 
   const handleTileClick = useCallback(
     (i: number) => {
       const hasBuilding = buildingMap.get(i)?.buildingId ?? 0;
-      if (!hasBuilding && selectedMarketBuildingId === null) {
+      if (!hasBuilding && selectedMarketSlot === null) {
         setTooltipTile(i);
         return;
       }
       setTooltipTile(null);
       onTileClick(i);
     },
-    [buildingMap, selectedMarketBuildingId, onTileClick]
+    [buildingMap, selectedMarketSlot, onTileClick]
   );
 
   const gridSize = 4;
@@ -70,7 +70,7 @@ export function GameBoard({ onTileClick }: GameBoardProps) {
         const hasBuilding = building && building.buildingId > 0;
         const bonusConsumed = building?.bonusConsumed === 1;
         const isSelected = selectedPosition === i;
-        const isPlacementTarget = !hasBuilding && selectedMarketBuildingId !== null;
+        const isPlacementTarget = !hasBuilding && selectedMarketSlot !== null;
         const bonus: TileBonus | null = boardSeed != null ? deriveTileBonus(boardSeed, i) : null;
         const hasBonusDisplay = bonus != null && bonus.bonusType !== 0;
 

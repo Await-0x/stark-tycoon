@@ -297,7 +297,7 @@ pub fn building_spec(building_id: u8) -> BuildingSpec {
     else if building_id == 21 {
         // Starknet Bridge — +6 Users/sec
         BuildingSpec {
-            capital_cost: 3500,
+            capital_cost: 1200,
             users_cost: 0,
             capital_production: 0,
             users_production: 6,
@@ -323,7 +323,7 @@ pub fn building_spec(building_id: u8) -> BuildingSpec {
     } else if building_id == 23 {
         // Wallet Provider — +8 Users/sec
         BuildingSpec {
-            capital_cost: 2800,
+            capital_cost: 1600,
             users_cost: 0,
             capital_production: 0,
             users_production: 8,

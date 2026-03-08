@@ -7,7 +7,6 @@ import AccountBalanceRounded from "@mui/icons-material/AccountBalanceRounded";
 import GroupRounded from "@mui/icons-material/GroupRounded";
 import ScienceRounded from "@mui/icons-material/ScienceRounded";
 import SwapHorizRounded from "@mui/icons-material/SwapHorizRounded";
-import TrendingUpRounded from "@mui/icons-material/TrendingUpRounded";
 import { BUILDING_SPECS, UPGRADE_SPECS, getMarketBuildings } from "@/types/game";
 import type { BuildingSpec, UpgradeSpec } from "@/types/game";
 import { getBuildingImage } from "@/utils/buildingImages";
@@ -40,11 +39,11 @@ function prodStats(spec: BuildingSpec | UpgradeSpec): { icon: React.ReactElement
   if (spec.txProduction > 0)
     items.push({ icon: <SwapHorizRounded sx={{ fontSize: IC }} />, value: `+${spec.txProduction}`, color: "#4ADE80" });
   if (spec.usersMultiplier > 0)
-    items.push({ icon: <TrendingUpRounded sx={{ fontSize: IC }} />, value: `U+${spec.usersMultiplier}%`, color: "#42C6FF" });
+    items.push({ icon: <GroupRounded sx={{ fontSize: IC }} />, value: `+${spec.usersMultiplier}%`, color: "#42C6FF" });
   if (spec.researchMultiplier > 0)
-    items.push({ icon: <TrendingUpRounded sx={{ fontSize: IC }} />, value: `R+${spec.researchMultiplier}%`, color: "#8B5CF6" });
+    items.push({ icon: <ScienceRounded sx={{ fontSize: IC }} />, value: `+${spec.researchMultiplier}%`, color: "#8B5CF6" });
   if (spec.txMultiplier > 0)
-    items.push({ icon: <TrendingUpRounded sx={{ fontSize: IC }} />, value: `TX+${spec.txMultiplier}%`, color: "#4ADE80" });
+    items.push({ icon: <SwapHorizRounded sx={{ fontSize: IC }} />, value: `+${spec.txMultiplier}%`, color: "#4ADE80" });
   return items;
 }
 
@@ -203,8 +202,8 @@ function MarketCard({
 export function MarketPanel() {
   const gameState = useGameStore((s) => s.gameState);
   const gameId = useGameStore((s) => s.gameId);
-  const selectedMarketBuildingId = useGameStore((s) => s.selectedMarketBuildingId);
-  const setSelectedMarketBuildingId = useGameStore((s) => s.setSelectedMarketBuildingId);
+  const selectedMarketSlot = useGameStore((s) => s.selectedMarketSlot);
+  const setSelectedMarketSlot = useGameStore((s) => s.setSelectedMarketSlot);
   const setSelectedPosition = useGameStore((s) => s.setSelectedPosition);
   const loadingMarketSlot = useGameStore((s) => s.loadingMarketSlot);
   const loadingMarketRefresh = useGameStore((s) => s.loadingMarketRefresh);
@@ -227,12 +226,12 @@ export function MarketPanel() {
       .filter(Boolean);
   }, [gameState]);
 
-  const handleCardClick = (spec: BuildingSpec) => {
+  const handleCardClick = (idx: number) => {
     setSelectedPosition(null);
-    if (selectedMarketBuildingId === spec.id) {
-      setSelectedMarketBuildingId(null);
+    if (selectedMarketSlot === idx) {
+      setSelectedMarketSlot(null);
     } else {
-      setSelectedMarketBuildingId(spec.id);
+      setSelectedMarketSlot(idx);
     }
   };
 
@@ -299,10 +298,10 @@ export function MarketPanel() {
           <MarketCard
             key={`${spec.id}-${idx}`}
             spec={spec}
-            isSelected={selectedMarketBuildingId === spec.id}
+            isSelected={selectedMarketSlot === idx}
             canAfford={canAfford}
             resources={resources}
-            onClick={() => handleCardClick(spec)}
+            onClick={() => handleCardClick(idx)}
           />
         );
       })}

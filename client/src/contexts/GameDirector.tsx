@@ -52,7 +52,7 @@ export const GameDirector = ({ children }: PropsWithChildren) => {
     setFinalScore,
     setLoadingMarketSlot,
     setLoadingMarketRefresh,
-    setSelectedMarketBuildingId,
+    setSelectedMarketSlot,
     setSelectedPosition,
     addNotification,
   } = useGameStore();
@@ -126,6 +126,8 @@ export const GameDirector = ({ children }: PropsWithChildren) => {
               b.positionId === evt.building.positionId
           );
           if (idx >= 0) {
+            // Don't let a destroy event (buildingId 0) overwrite a newer optimistic buy
+            if (evt.building.buildingId === 0 && updated[idx].buildingId > 0) continue;
             updated[idx] = evt.building;
           } else {
             updated.push(evt.building);
@@ -207,7 +209,7 @@ export const GameDirector = ({ children }: PropsWithChildren) => {
         }
 
         // Clear selections
-        setSelectedMarketBuildingId(null);
+        setSelectedMarketSlot(null);
         setSelectedPosition(null);
 
         // Mark purchased market slot as loading (can't predict VRF replacement)
@@ -357,8 +359,25 @@ export const GameDirector = ({ children }: PropsWithChildren) => {
         }
         setGamePhase("playing");
       }
-      if (prevGameState) setGameState(prevGameState);
-      setBuildings(prevBuildings);
+      // For destroy, do a targeted rollback so we don't stomp concurrent buy optimistic state
+      if (action.type === "destroy_building") {
+        const originalBld = prevBuildings.find(
+          (b) => b.gameId === action.gameId && b.positionId === action.positionId
+        );
+        if (originalBld) {
+          setBuildings((prev) =>
+            prev.map((b) =>
+              b.gameId === action.gameId && b.positionId === action.positionId
+                ? originalBld
+                : b
+            )
+          );
+        }
+        if (prevGameState) setGameState(prevGameState);
+      } else {
+        if (prevGameState) setGameState(prevGameState);
+        setBuildings(prevBuildings);
+      }
       setLoadingMarketSlot(null);
       setLoadingMarketRefresh(false);
       if (needsLock) setActionInProgress(false);
