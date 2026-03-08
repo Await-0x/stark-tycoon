@@ -19,7 +19,8 @@ export const useSystemCalls = () => {
   // ── Core execution ──
   const executeAction = async (
     calls: Call[],
-    onFailure: () => void
+    onFailure: () => void,
+    options?: { silent?: boolean }
   ): Promise<TranslatedGameEvent[] | null | undefined> => {
     if (!account) {
       onFailure();
@@ -31,9 +32,11 @@ export const useSystemCalls = () => {
       const receipt = await waitForTransaction(tx.transaction_hash, 0);
 
       if (receipt.execution_status === "REVERTED") {
-        enqueueSnackbar("Transaction reverted", {
-          variant: "error",
-        });
+        if (!options?.silent) {
+          enqueueSnackbar("Transaction reverted", {
+            variant: "error",
+          });
+        }
         onFailure();
         return undefined;
       }
@@ -64,9 +67,11 @@ export const useSystemCalls = () => {
             .execution_error
           : undefined;
 
-      enqueueSnackbar(parseExecutionError(executionError), {
-        variant: "error",
-      });
+      if (!options?.silent) {
+        enqueueSnackbar(parseExecutionError(executionError), {
+          variant: "error",
+        });
+      }
       onFailure();
       return null;
     }

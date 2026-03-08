@@ -33,11 +33,14 @@ export function GameScreen() {
 
   useEffect(() => { preloadBuildingImages(); }, []);
 
-  // Auto-submit score when timer expires
+  // Auto-submit score when timer expires (2s delay for block timestamp lag)
   useEffect(() => {
     if (isExpired && gamePhase === "playing" && gameId && !submitFiredRef.current) {
       submitFiredRef.current = true;
-      executeGameAction({ type: "submit_score", gameId });
+      const timer = setTimeout(() => {
+        executeGameAction({ type: "submit_score", gameId });
+      }, 2000);
+      return () => clearTimeout(timer);
     }
   }, [isExpired, gamePhase, gameId, executeGameAction]);
 

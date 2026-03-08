@@ -6,7 +6,7 @@ import type {
   BoardTranslation,
 } from "@/utils/translation";
 import { useGameStore } from "@/stores/gameStore";
-import type { GameAction } from "@/types/game";
+import type { GameAction, SubmitScoreAction } from "@/types/game";
 import { BUILDING_SPECS, UPGRADE_SPECS, GAME_DURATION, getMarketBuildings, unpackMintedAt } from "@/types/game";
 import type { Call } from "starknet";
 import {
@@ -258,16 +258,27 @@ export const GameDirector = ({ children }: PropsWithChildren) => {
         break;
     }
 
-    const events = await executeAction(txs, setActionFailed);
+    const isSubmit = action.type === "submit_score";
+    const events = await executeAction(txs, setActionFailed, isSubmit ? { silent: true } : undefined);
 
     if (!events) {
+      // Retry submit_score up to 3 times with 3s delay (block timestamp may lag)
+      if (isSubmit) {
+        const attempt = (action as SubmitScoreAction & { _retry?: number })._retry ?? 0;
+        if (attempt < 3) {
+          await new Promise((r) => setTimeout(r, 3000));
+          return executeGameAction({ ...action, _retry: attempt + 1 } as GameAction);
+        }
+        setGamePhase("playing");
+      }
       if (prevGameState) setGameState(prevGameState);
       setBuildings(prevBuildings);
       setLoadingMarketSlot(null);
       setLoadingMarketRefresh(false);
-      if (action.type === "submit_score") setGamePhase("playing");
       setActionFailed();
-      addNotification({ type: "error", message: "Action failed" });
+      if (!isSubmit) {
+        addNotification({ type: "error", message: "Action failed" });
+      }
       return false;
     }
 
