@@ -18,7 +18,7 @@ import { useController } from "@/contexts/controller";
 import { useSystemCalls } from "@/dojo/useSystemCalls";
 import { useGameStore } from "@/stores/gameStore";
 import type { TranslatedGameEvent } from "@/utils/translation";
-import type { GameStateTranslation, BuildingTranslation } from "@/utils/translation";
+import type { GameStateTranslation, BuildingTranslation, BoardTranslation } from "@/utils/translation";
 import { unpackMintedAt } from "@/types/game";
 import { GlassPanel } from "./GlassPanel";
 import { Leaderboard } from "./Leaderboard";
@@ -31,12 +31,16 @@ const isBuildingEvent = (
   e: TranslatedGameEvent
 ): e is BuildingTranslation => e.componentName === "Building";
 
+const isBoardEvent = (
+  e: TranslatedGameEvent
+): e is BoardTranslation => e.componentName === "Board";
+
 export function MainMenu() {
   const navigate = useNavigate();
   const { account, address, playerName, isPending, openProfile, login } =
     useController();
   const { executeStartGame } = useSystemCalls();
-  const { setGameId, setGameState, setBuildings } = useGameStore();
+  const { setGameId, setGameState, setBuildings, setBoardSeed } = useGameStore();
   const [howToPlayOpen, setHowToPlayOpen] = useState(false);
   const [leaderboardOpen, setLeaderboardOpen] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
@@ -72,6 +76,11 @@ export function MainMenu() {
     const buildingEvents = result.events.filter(isBuildingEvent);
     if (buildingEvents.length > 0) {
       setBuildings(buildingEvents.map((e) => e.building));
+    }
+
+    const boardEvents = result.events.filter(isBoardEvent);
+    if (boardEvents.length > 0) {
+      setBoardSeed(boardEvents[boardEvents.length - 1].seed);
     }
 
     navigate(`/play?id=${result.gameTokenId}`);
@@ -289,9 +298,10 @@ export function MainMenu() {
           </Section>
 
           <Section title="Board & Market">
-            Place buildings on a 5×5 grid (25 slots). Pick from 5 randomly
-            available buildings in the market — each purchase refreshes that
-            slot with a new random option.
+            Place buildings on a 4×4 grid (16 slots). Each tile may have a
+            random bonus (extra production or instant resources). Pick from
+            randomly available buildings in the market — each purchase
+            refreshes that slot with a new random option.
           </Section>
 
           <Section title="Building Types">

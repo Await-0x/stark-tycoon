@@ -3,6 +3,7 @@ import type { TranslatedGameEvent } from "@/utils/translation";
 import type {
   GameStateTranslation,
   BuildingTranslation,
+  BoardTranslation,
 } from "@/utils/translation";
 import { useGameStore } from "@/stores/gameStore";
 import type { GameAction } from "@/types/game";
@@ -26,6 +27,10 @@ const isBuildingEvent = (
   e: TranslatedGameEvent
 ): e is BuildingTranslation => e.componentName === "Building";
 
+const isBoardEvent = (
+  e: TranslatedGameEvent
+): e is BoardTranslation => e.componentName === "Board";
+
 interface GameDirectorContextType {
   executeGameAction: (action: GameAction) => Promise<boolean>;
   actionFailed: number;
@@ -41,6 +46,7 @@ export const GameDirector = ({ children }: PropsWithChildren) => {
     setGameId,
     setGameState,
     setBuildings,
+    setBoardSeed,
     setActionInProgress,
     setGamePhase,
     setFinalScore,
@@ -86,6 +92,7 @@ export const GameDirector = ({ children }: PropsWithChildren) => {
       const mintedAt = unpackMintedAt(gameId);
       setGameState({ ...result.gameState, mintedAt });
       setBuildings(result.buildings);
+      setBoardSeed(result.boardSeed);
 
       if (result.gameState.gameTime >= GAME_DURATION) {
         setGamePhase("ended");
@@ -131,6 +138,12 @@ export const GameDirector = ({ children }: PropsWithChildren) => {
         }
         return updated;
       });
+    }
+
+    const boardEvents = events.filter(isBoardEvent);
+    if (boardEvents.length > 0) {
+      const latest = boardEvents[boardEvents.length - 1];
+      setBoardSeed(latest.seed);
     }
   };
 

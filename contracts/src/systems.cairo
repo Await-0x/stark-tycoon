@@ -1,4 +1,4 @@
-use crate::models::{Building, Game};
+use crate::models::{Board, Building, Game};
 
 #[starknet::interface]
 pub trait IStarktycoonActions<T> {
@@ -7,7 +7,7 @@ pub trait IStarktycoonActions<T> {
     fn upgrade_building(ref self: T, game_id: felt252, position_id: u8, upgrade_id: u8);
     fn refresh_market(ref self: T, game_id: felt252);
     fn submit_score(ref self: T, game_id: felt252);
-    fn get_game_state(self: @T, game_id: felt252) -> (Game, Span<Building>);
+    fn get_game_state(self: @T, game_id: felt252) -> (Game, Board, Span<Building>);
 }
 
 #[dojo::contract]
@@ -27,7 +27,8 @@ pub mod starktycoon {
         BOARD_SIZE, GAME_DURATION, MARKET_SIZE, START_CAPITAL, START_CAPITAL_PRODUCTION,
         TOTAL_BUILDINGS,
     };
-    use crate::models::{Building, Game};
+    use crate::models::{Board, Building, Game};
+    use crate::utils::board;
     use crate::utils::buildings::{building_spec, upgrade_spec};
     use crate::utils::market;
     use crate::utils::vrf::VRFImpl;
@@ -114,13 +115,21 @@ pub mod starktycoon {
                 0,
             );
 
+            let vrf_seed = VRFImpl::seed();
+            let seed_u256: u256 = vrf_seed.into();
+            let market_seed: felt252 = seed_u256.low.into();
+            let board_seed: u64 = (seed_u256.high % 0x10000000000000000).try_into().unwrap();
+
             let mut game: Game = world.read_model(game_id);
             game.capital = START_CAPITAL;
             game.capital_production = START_CAPITAL_PRODUCTION;
             game.market_size = MARKET_SIZE;
-            game.market_packed = market::pack_market_from_seed(VRFImpl::seed(), MARKET_SIZE);
+            game.market_packed = market::pack_market_from_seed(market_seed, MARKET_SIZE);
+
+            let board = Board { game_id, seed: board_seed };
 
             world.write_model(@game);
+            world.write_model(@board);
             game_id
         }
 
@@ -169,6 +178,11 @@ pub mod starktycoon {
             game.users_multiplier += spec.users_multiplier;
             game.research_multiplier += spec.research_multiplier;
             game.tx_multiplier += spec.tx_multiplier;
+
+            // Apply tile bonus
+            let board_data: Board = world.read_model(game_id);
+            let bonus = board::derive_tile_bonus(board_data.seed, position_id);
+            board::apply_tile_bonus(ref game, bonus);
 
             // Replace the bought slot with a new random building
             game
@@ -271,9 +285,10 @@ pub mod starktycoon {
             post_action(denshokan_address, game_id);
         }
 
-        fn get_game_state(self: @ContractState, game_id: felt252) -> (Game, Span<Building>) {
+        fn get_game_state(self: @ContractState, game_id: felt252) -> (Game, Board, Span<Building>) {
             let world = self.world_default();
             let game: Game = world.read_model(game_id);
+            let board: Board = world.read_model(game_id);
             let mut buildings = array![];
 
             for position_id in 0..BOARD_SIZE {
@@ -283,7 +298,7 @@ pub mod starktycoon {
                 }
             }
 
-            (game, buildings.span())
+            (game, board, buildings.span())
         }
     }
 

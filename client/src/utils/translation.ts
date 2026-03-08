@@ -17,6 +17,7 @@ const normalizeSelector = (sel: string | bigint): string => {
 // ── Model selectors from manifest (namespaced by Dojo) ──
 const GAME_MODEL_NORMALIZED = normalizeSelector("0x50c98e95d2a76c5375bd2be3ada7eae0fab7db5223d387bf2d57224d2951857");
 const BUILDING_MODEL_NORMALIZED = normalizeSelector("0x32f231f41d3cd55910154451460f226af2c5c5a02da3ce56853d5b1ef47335f");
+const BOARD_MODEL_NORMALIZED = normalizeSelector("0x02500c08990c158d042249fe13fcf7eca212ff42a6605a3174f5ed3f3d9d9875");
 
 // ── Translated event types ──
 
@@ -31,7 +32,13 @@ export interface BuildingTranslation {
   building: Building;
 }
 
-export type TranslatedGameEvent = GameStateTranslation | BuildingTranslation;
+export interface BoardTranslation {
+  componentName: "Board";
+  gameId: string;
+  seed: bigint;
+}
+
+export type TranslatedGameEvent = GameStateTranslation | BuildingTranslation | BoardTranslation;
 
 // ── Helpers ──
 
@@ -98,6 +105,21 @@ function decodeBuildingUpdate(
   };
 }
 
+// ── Decode Board model from StoreSetRecord data ──
+// Layout: game_id (key), seed(u64) (value)
+function decodeBoardState(
+  keys: string[],
+  values: string[]
+): BoardTranslation | null {
+  if (values.length < 1) return null;
+
+  return {
+    componentName: "Board",
+    gameId: keys[0] || "0x0",
+    seed: hexToBigInt(values[0]),
+  };
+}
+
 // ── Main dispatcher ──
 
 type StarknetEventLike = {
@@ -134,6 +156,11 @@ export const translateGameEvent = (
 
   if (modelSelector === BUILDING_MODEL_NORMALIZED) {
     const result = decodeBuildingUpdate(entityKeys, values);
+    return result ? [result] : [];
+  }
+
+  if (modelSelector === BOARD_MODEL_NORMALIZED) {
+    const result = decodeBoardState(entityKeys, values);
     return result ? [result] : [];
   }
 

@@ -254,7 +254,7 @@ const _rpcUrl = getNetworkConfig().rpcUrl;
 
 export async function fetchGameState(
   gameId: string
-): Promise<{ gameState: GameState; buildings: Building[] } | null> {
+): Promise<{ gameState: GameState; boardSeed: bigint; buildings: Building[] } | null> {
   try {
     const response = await fetch(_rpcUrl, {
       method: "POST",
@@ -275,11 +275,13 @@ export async function fetchGameState(
     });
 
     const data = await response.json();
-    if (!data?.result || data.result.length < 17) return null;
+    if (!data?.result || data.result.length < 19) return null;
 
     const r = data.result;
     const hex = (v: string) => parseInt(v, 16);
 
+    // r[0] = game_id (Game key)
+    // r[1..15] = Game fields
     const gameState: GameState = {
       mintedAt: 0,
       capital: hex(r[1]),
@@ -298,10 +300,14 @@ export async function fetchGameState(
       refreshCount: hex(r[15]),
     };
 
-    const buildingsCount = hex(r[16]);
+    // r[16] = Board game_id (key), r[17] = Board seed
+    const boardSeed = BigInt(r[17]);
+
+    // r[18] = buildings count, r[19+] = buildings
+    const buildingsCount = hex(r[18]);
     const buildings: Building[] = [];
     for (let i = 0; i < buildingsCount; i++) {
-      const base = 17 + i * 4;
+      const base = 19 + i * 4;
       buildings.push({
         gameId: r[base],
         positionId: hex(r[base + 1]),
@@ -310,7 +316,7 @@ export async function fetchGameState(
       });
     }
 
-    return { gameState, buildings };
+    return { gameState, boardSeed, buildings };
   } catch (error) {
     console.error("Error fetching game state:", error);
     return null;

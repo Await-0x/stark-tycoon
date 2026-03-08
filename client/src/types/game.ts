@@ -1,7 +1,7 @@
 // ── Game Constants ──
 
-export const BOARD_SIZE = 25;
-export const GAME_DURATION = 1200;
+export const BOARD_SIZE = 16;
+export const GAME_DURATION = 900;
 export const MARKET_SIZE = 6;
 export const TOTAL_BUILDINGS = 25;
 export const START_CAPITAL = 2000;
@@ -401,6 +401,40 @@ export const UPGRADE_SPECS: Record<number, [UpgradeSpec, UpgradeSpec]> = {
     { name: "Universal Profile System", researchCost: 2800, capitalProduction: 0, usersProduction: 6, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
   ],
 };
+
+// ── Tile Bonus (mirrors Cairo board.cairo) ──
+
+export interface TileBonus {
+  bonusType: number;
+  bonusValue: number;
+}
+
+export function deriveTileBonus(seed: bigint, positionId: number): TileBonus {
+  let entropy = seed;
+  for (let i = 0; i < positionId; i++) {
+    entropy = entropy / 40n;
+  }
+  const bonusType = Number(entropy % 8n);
+  const rawValue = Number((entropy / 8n) % 5n);
+
+  let bonusValue = 0;
+  switch (bonusType) {
+    case 0: bonusValue = 0; break;
+    case 1: bonusValue = rawValue + 1; break;
+    case 2: bonusValue = (rawValue % 3) + 1; break;
+    case 3: bonusValue = (rawValue % 3) + 1; break;
+    case 4: bonusValue = (rawValue + 1) * 100; break;
+    case 5: bonusValue = (rawValue % 3 + 1) * 100; break;
+    case 6: bonusValue = (rawValue % 3 + 1) * 100; break;
+    case 7: bonusValue = (rawValue % 3 + 1) * 100; break;
+  }
+
+  return { bonusType, bonusValue };
+}
+
+export function getAllTileBonuses(seed: bigint): TileBonus[] {
+  return Array.from({ length: BOARD_SIZE }, (_, i) => deriveTileBonus(seed, i));
+}
 
 // ── Token ID Helpers (mirrors Cairo token_id.cairo) ──
 

@@ -2,7 +2,12 @@ import { useMemo } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { motion, AnimatePresence } from "framer-motion";
-import { BUILDING_SPECS, BOARD_SIZE } from "@/types/game";
+import AccountBalanceRoundedIcon from "@mui/icons-material/AccountBalanceRounded";
+import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
+import ScienceRoundedIcon from "@mui/icons-material/ScienceRounded";
+import SwapHorizRoundedIcon from "@mui/icons-material/SwapHorizRounded";
+import { BUILDING_SPECS, BOARD_SIZE, deriveTileBonus } from "@/types/game";
+import type { TileBonus } from "@/types/game";
 import { getBuildingImage } from "@/utils/buildingImages";
 import { useGameStore } from "@/stores/gameStore";
 
@@ -14,6 +19,7 @@ export function GameBoard({ onTileClick }: GameBoardProps) {
   const buildings = useGameStore((s) => s.buildings);
   const selectedPosition = useGameStore((s) => s.selectedPosition);
   const selectedMarketBuildingId = useGameStore((s) => s.selectedMarketBuildingId);
+  const boardSeed = useGameStore((s) => s.boardSeed);
 
   const buildingMap = useMemo(() => {
     const map = new Map<number, (typeof buildings)[0]>();
@@ -21,7 +27,7 @@ export function GameBoard({ onTileClick }: GameBoardProps) {
     return map;
   }, [buildings]);
 
-  const gridSize = 5;
+  const gridSize = 4;
 
   return (
     <Box
@@ -37,6 +43,8 @@ export function GameBoard({ onTileClick }: GameBoardProps) {
         const building = buildingMap.get(i);
         const isSelected = selectedPosition === i;
         const isPlacementTarget = !building && selectedMarketBuildingId !== null;
+        const bonus: TileBonus | null = boardSeed != null ? deriveTileBonus(boardSeed, i) : null;
+        const hasBonusDisplay = bonus != null && bonus.bonusType !== 0;
 
         return (
           <Box
@@ -126,10 +134,16 @@ export function GameBoard({ onTileClick }: GameBoardProps) {
                       ))}
                     </Box>
                   )}
+                  {hasBonusDisplay && (
+                    <TileBonusBadge bonus={bonus} position="bottom-left" />
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>
-            {!building && isPlacementTarget && (
+            {!building && hasBonusDisplay && (
+              <TileBonusBadge bonus={bonus} position="center" />
+            )}
+            {!building && !hasBonusDisplay && isPlacementTarget && (
               <Typography
                 sx={{
                   fontSize: "1.2rem",
@@ -143,6 +157,46 @@ export function GameBoard({ onTileClick }: GameBoardProps) {
           </Box>
         );
       })}
+    </Box>
+  );
+}
+
+const BONUS_CONFIG: Record<number, { color: string; icon: typeof AccountBalanceRoundedIcon; isProduction: boolean }> = {
+  1: { color: "#FFD54F", icon: AccountBalanceRoundedIcon, isProduction: true },
+  2: { color: "#42C6FF", icon: GroupRoundedIcon, isProduction: true },
+  3: { color: "#8B5CF6", icon: ScienceRoundedIcon, isProduction: true },
+  4: { color: "#FFD54F", icon: AccountBalanceRoundedIcon, isProduction: false },
+  5: { color: "#42C6FF", icon: GroupRoundedIcon, isProduction: false },
+  6: { color: "#8B5CF6", icon: ScienceRoundedIcon, isProduction: false },
+  7: { color: "#4ADE80", icon: SwapHorizRoundedIcon, isProduction: false },
+};
+
+function TileBonusBadge({ bonus, position }: { bonus: TileBonus; position: "center" | "bottom-left" }) {
+  const config = BONUS_CONFIG[bonus.bonusType];
+  if (!config) return null;
+
+  const Icon = config.icon;
+  const label = config.isProduction ? `+${bonus.bonusValue}/s` : `+${bonus.bonusValue}`;
+
+  return (
+    <Box
+      sx={{
+        ...(position === "bottom-left"
+          ? { position: "absolute", bottom: 4, left: 4 }
+          : {}),
+        display: "flex",
+        alignItems: "center",
+        gap: "2px",
+        bgcolor: "rgba(0,0,0,0.5)",
+        borderRadius: "6px",
+        px: 0.5,
+        py: 0.25,
+      }}
+    >
+      <Icon sx={{ fontSize: 12, color: config.color }} />
+      <Typography sx={{ fontSize: "0.6rem", color: config.color, fontWeight: 700, lineHeight: 1 }}>
+        {label}
+      </Typography>
     </Box>
   );
 }

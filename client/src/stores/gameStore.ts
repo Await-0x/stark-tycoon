@@ -13,6 +13,7 @@ interface GameStoreState {
   gameId: string | null;
   gameState: GameState | null;
   buildings: Building[];
+  boardSeed: bigint | null;
   actionInProgress: boolean;
   gamePhase: "playing" | "submitting" | "ended";
   finalScore: number | null;
@@ -25,6 +26,7 @@ interface GameStoreState {
   notifications: GameNotification[];
 
   // Setters
+  setBoardSeed: (seed: bigint | null) => void;
   setGameId: (id: string | null) => void;
   setGameState: (
     state: GameState | null | ((prev: GameState | null) => GameState | null)
@@ -50,6 +52,7 @@ export const useGameStore = create<GameStoreState>((set) => ({
   gameId: null,
   gameState: null,
   buildings: [],
+  boardSeed: null,
   actionInProgress: false,
   gamePhase: "playing",
   finalScore: null,
@@ -59,6 +62,7 @@ export const useGameStore = create<GameStoreState>((set) => ({
   loadingMarketRefresh: false,
   notifications: [],
 
+  setBoardSeed: (seed) => set({ boardSeed: seed }),
   setGameId: (id) => set({ gameId: id }),
 
   setGameState: (state) =>
@@ -102,6 +106,7 @@ export const useGameStore = create<GameStoreState>((set) => ({
       gameId: null,
       gameState: null,
       buildings: [],
+      boardSeed: null,
       actionInProgress: false,
       gamePhase: "playing",
       finalScore: null,

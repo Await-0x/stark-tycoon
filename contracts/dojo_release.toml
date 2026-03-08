@@ -1,6 +1,6 @@
 [world]
 name = "StarkTycoon"
-description = "20-minute on-chain tycoon game"
+description = "15-minute on-chain tycoon game"
 seed = "StarkTycoon"
 
 [namespace]

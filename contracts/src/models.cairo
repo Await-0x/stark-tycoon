@@ -27,6 +27,14 @@ pub struct Game {
 
 #[derive(IntrospectPacked, Copy, Drop, Serde, Debug)]
 #[dojo::model]
+pub struct Board {
+    #[key]
+    pub game_id: felt252,
+    pub seed: u64,
+}
+
+#[derive(IntrospectPacked, Copy, Drop, Serde, Debug)]
+#[dojo::model]
 pub struct Building {
     #[key]
     pub game_id: felt252,
