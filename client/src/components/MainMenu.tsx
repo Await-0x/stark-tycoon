@@ -326,6 +326,13 @@ export function MainMenu() {
             Every building has 2 sequential upgrades that cost Research and
             permanently boost its output. Apply Upgrade 1 before Upgrade 2.
           </Section>
+
+          <Section title="Destroying Buildings">
+            You can destroy a placed building to free up its tile for a new
+            one. This removes the building and all its production permanently
+            — upgrades are not refunded. Use it to replace early-game
+            buildings with stronger options later.
+          </Section>
         </DialogContent>
       </Dialog>
 

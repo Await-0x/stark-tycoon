@@ -7,7 +7,7 @@ import type {
 } from "@/utils/translation";
 import { useGameStore } from "@/stores/gameStore";
 import type { GameAction, SubmitScoreAction } from "@/types/game";
-import { BUILDING_SPECS, UPGRADE_SPECS, GAME_DURATION, getMarketBuildings, unpackMintedAt } from "@/types/game";
+import { BUILDING_SPECS, UPGRADE_SPECS, GAME_DURATION, getMarketBuildings, unpackMintedAt, deriveTileBonus } from "@/types/game";
 import type { Call } from "starknet";
 import {
   createContext,
@@ -181,6 +181,30 @@ export const GameDirector = ({ children }: PropsWithChildren) => {
           }
           return [...prev, { gameId: action.gameId, positionId: action.positionId, buildingId: action.buildingId, upgradeLevel: 0, bonusConsumed: 1 }];
         });
+
+        // Optimistic: apply tile placement bonus
+        const boardSeed = useGameStore.getState().boardSeed;
+        const existingEntry = prevBuildings.find(
+          (b) => b.gameId === action.gameId && b.positionId === action.positionId
+        );
+        if (boardSeed != null && existingEntry?.bonusConsumed !== 1) {
+          const bonus = deriveTileBonus(boardSeed, action.positionId);
+          if (bonus.bonusType !== 0) {
+            setGameState((prev) => {
+              if (!prev) return prev;
+              switch (bonus.bonusType) {
+                case 1: return { ...prev, capitalProduction: prev.capitalProduction + bonus.bonusValue };
+                case 2: return { ...prev, usersProduction: prev.usersProduction + bonus.bonusValue };
+                case 3: return { ...prev, researchProduction: prev.researchProduction + bonus.bonusValue };
+                case 4: return { ...prev, capital: prev.capital + bonus.bonusValue };
+                case 5: return { ...prev, users: prev.users + bonus.bonusValue };
+                case 6: return { ...prev, research: prev.research + bonus.bonusValue };
+                case 7: return { ...prev, transactions: prev.transactions + bonus.bonusValue };
+                default: return prev;
+              }
+            });
+          }
+        }
 
         // Clear selections
         setSelectedMarketBuildingId(null);
