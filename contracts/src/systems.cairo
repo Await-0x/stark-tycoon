@@ -86,7 +86,7 @@ pub mod starktycoon {
                 denshokan_address,
                 Option::None,
                 Option::None,
-                1,
+                2,
             );
     }
 
@@ -325,7 +325,7 @@ pub mod starktycoon {
     #[generate_trait]
     impl InternalImpl of InternalTrait {
         fn world_default(self: @ContractState) -> dojo::world::WorldStorage {
-            self.world(@"ST_0_0_1")
+            self.world(@"ST_0_0_2")
         }
     }
 

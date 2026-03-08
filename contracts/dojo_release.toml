@@ -4,16 +4,16 @@ description = "15-minute on-chain tycoon game"
 seed = "StarkTycoon"
 
 [namespace]
-default = "ST_0_0_1"
+default = "ST_0_0_2"
 
 [env]
 rpc_url = "https://api.cartridge.gg/x/starknet/sepolia"
 
 [writers]
-"ST_0_0_1" = ["ST_0_0_1-starktycoon"]
+"ST_0_0_2" = ["ST_0_0_2-starktycoon"]
 
 [init_call_args]
-"ST_0_0_1-starktycoon" = [
+"ST_0_0_2-starktycoon" = [
     "0x0248f76e72088853c3fE96CAd8F7f075c9e514B862A6e9a3D5957EA5522eBb6D", # account address
     "0x0142712722e62a38f9c40fcc904610e1a14c70125876ecaaf25d803556734467", # denshokan address
 ]

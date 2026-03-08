@@ -23,7 +23,7 @@ const NETWORKS = {
   SN_SEPOLIA: {
     chainId: ChainId.SN_SEPOLIA,
     manifest,
-    namespace: "ST_0_0_1",
+    namespace: "ST_0_0_2",
     rpcUrl: "https://api.cartridge.gg/x/starknet/sepolia",
   },
 };

@@ -33,19 +33,20 @@
   },
   "contracts": [
     {
-      "address": "0x328069be17405a9f6237f61515fbf45a87e0ff1b83ecdebf6bbef9417291dae",
-      "class_hash": "0x12cb577ef5f278eb705429f2b6d896bc35a968adb2ba5ad34f62785f5697781",
+      "address": "0x160a96285b2959bc376650fc2393ebb411da5dd36618f32efb5e57f8811422e",
+      "class_hash": "0x77d4df4f06ea94bba909e449bbbd4e8b81cd3253872b9c7078b217c49cca764",
       "init_calldata": [
         "0x0248f76e72088853c3fE96CAd8F7f075c9e514B862A6e9a3D5957EA5522eBb6D",
         "0x0142712722e62a38f9c40fcc904610e1a14c70125876ecaaf25d803556734467"
       ],
-      "tag": "ST_0_0_1-starktycoon",
-      "selector": "0x18bc47de09c7b263deda3e5741a09cd630c8d58c8610ec40a3071412155d4b8",
+      "tag": "ST_0_0_2-starktycoon",
+      "selector": "0x13a0eded7bc94cf0613435f449d1725a2ac3e660d463854732ddc0e3443446b",
       "systems": [
         "dojo_init",
         "start_game",
         "buy_building",
         "upgrade_building",
+        "refresh_market",
         "submit_score",
         "upgrade"
       ]
@@ -53,6 +54,23 @@
   ],
   "libraries": [],
   "models": [
+    {
+      "members": [
+        {
+          "name": "game_id",
+          "type": "core::felt252",
+          "key": true
+        },
+        {
+          "name": "seed",
+          "type": "core::integer::u64",
+          "key": false
+        }
+      ],
+      "class_hash": "0x61879126173f1559e277312a871afb160b057d0b415ad33c68a34151012d358",
+      "tag": "ST_0_0_2-Board",
+      "selector": "0x6f312b28cca0b15dc92182ef22763f751285892c73b969b6cc15f6b10f7c604"
+    },
     {
       "members": [
         {
@@ -77,8 +95,8 @@
         }
       ],
       "class_hash": "0x4e7b55a23ae88ef6a13680cc71c12b1467a0cbd63a3372611fc390affd3ceab",
-      "tag": "ST_0_0_1-Building",
-      "selector": "0x32f231f41d3cd55910154451460f226af2c5c5a02da3ce56853d5b1ef47335f"
+      "tag": "ST_0_0_2-Building",
+      "selector": "0x70449f70d2647d4d914350435ed6702dca99bc46cb55f81de792de4cdfeb301"
     },
     {
       "members": [
@@ -154,13 +172,18 @@
         },
         {
           "name": "market_packed",
-          "type": "core::integer::u64",
+          "type": "core::integer::u32",
+          "key": false
+        },
+        {
+          "name": "refresh_count",
+          "type": "core::integer::u8",
           "key": false
         }
       ],
-      "class_hash": "0x687f7a66aace8f4c497c06470ffae5a4f532bdfe21781606f16807368aa54f",
-      "tag": "ST_0_0_1-Game",
-      "selector": "0x50c98e95d2a76c5375bd2be3ada7eae0fab7db5223d387bf2d57224d2951857"
+      "class_hash": "0x3f3f98f0b32cbaae750ea243b7fc7dd1517998ede973230093eb64c1d03d11b",
+      "tag": "ST_0_0_2-Game",
+      "selector": "0x210d04d219dd4aa700834162315f55ec5a1014afe479ada396a4c702307683"
     }
   ],
   "events": [],
@@ -2451,6 +2474,30 @@
     },
     {
       "type": "struct",
+      "name": "stark_tycoon::models::Board",
+      "members": [
+        {
+          "name": "game_id",
+          "type": "core::felt252"
+        },
+        {
+          "name": "seed",
+          "type": "core::integer::u64"
+        }
+      ]
+    },
+    {
+      "type": "struct",
+      "name": "stark_tycoon::models::BoardValue",
+      "members": [
+        {
+          "name": "seed",
+          "type": "core::integer::u64"
+        }
+      ]
+    },
+    {
+      "type": "struct",
       "name": "stark_tycoon::models::Building",
       "members": [
         {
@@ -2547,7 +2594,11 @@
         },
         {
           "name": "market_packed",
-          "type": "core::integer::u64"
+          "type": "core::integer::u32"
+        },
+        {
+          "name": "refresh_count",
+          "type": "core::integer::u8"
         }
       ]
     },
@@ -2609,9 +2660,19 @@
         },
         {
           "name": "market_packed",
-          "type": "core::integer::u64"
+          "type": "core::integer::u32"
+        },
+        {
+          "name": "refresh_count",
+          "type": "core::integer::u8"
         }
       ]
+    },
+    {
+      "type": "event",
+      "name": "stark_tycoon::models::m_Board::Event",
+      "kind": "enum",
+      "variants": []
     },
     {
       "type": "event",
@@ -2638,7 +2699,11 @@
               "type": "core::option::Option::<core::felt252>"
             }
           ],
-          "outputs": [],
+          "outputs": [
+            {
+              "type": "core::felt252"
+            }
+          ],
           "state_mutability": "external"
         },
         {
@@ -2683,6 +2748,18 @@
         },
         {
           "type": "function",
+          "name": "refresh_market",
+          "inputs": [
+            {
+              "name": "game_id",
+              "type": "core::felt252"
+            }
+          ],
+          "outputs": [],
+          "state_mutability": "external"
+        },
+        {
+          "type": "function",
           "name": "submit_score",
           "inputs": [
             {
@@ -2704,7 +2781,7 @@
           ],
           "outputs": [
             {
-              "type": "(stark_tycoon::models::Game, core::array::Span::<stark_tycoon::models::Building>)"
+              "type": "(stark_tycoon::models::Game, stark_tycoon::models::Board, core::array::Span::<stark_tycoon::models::Building>)"
             }
           ],
           "state_mutability": "view"
