@@ -205,15 +205,10 @@ export function BuildingDetails({ building, onUpgrade, onDestroy }: BuildingDeta
         <Typography sx={{ fontSize: "0.6rem", fontWeight: 600, color: "text.secondary", textTransform: "uppercase", letterSpacing: "0.05em" }}>
           Destroy
         </Typography>
-        <Typography sx={{ fontSize: "0.7rem", opacity: 0.6, lineHeight: 1.3 }}>
-          Removes this building and all its production bonuses. No resources are refunded.
-        </Typography>
         <Button
           variant="outlined"
           size="small"
           color="error"
-          disabled={actionInProgress}
-          loading={actionInProgress}
           onClick={() => onDestroy(building.positionId)}
           sx={{ fontSize: "0.75rem", fontWeight: 700, borderRadius: "8px" }}
         >

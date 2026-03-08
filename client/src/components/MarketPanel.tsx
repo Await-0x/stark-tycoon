@@ -281,7 +281,7 @@ export function MarketPanel() {
                 p: 0,
                 borderRadius: "10px",
                 overflow: "hidden",
-                height: 80,
+                height: 62,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",

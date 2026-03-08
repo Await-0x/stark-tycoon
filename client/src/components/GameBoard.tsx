@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { motion, AnimatePresence } from "framer-motion";
@@ -20,12 +20,38 @@ export function GameBoard({ onTileClick }: GameBoardProps) {
   const selectedPosition = useGameStore((s) => s.selectedPosition);
   const selectedMarketBuildingId = useGameStore((s) => s.selectedMarketBuildingId);
   const boardSeed = useGameStore((s) => s.boardSeed);
+  const [tooltipTile, setTooltipTile] = useState<number | null>(null);
 
   const buildingMap = useMemo(() => {
     const map = new Map<number, (typeof buildings)[0]>();
     for (const b of buildings) map.set(b.positionId, b);
     return map;
   }, [buildings]);
+
+  // Auto-dismiss tooltip
+  useEffect(() => {
+    if (tooltipTile === null) return;
+    const timer = setTimeout(() => setTooltipTile(null), 2000);
+    return () => clearTimeout(timer);
+  }, [tooltipTile]);
+
+  // Clear tooltip when a market building is selected
+  useEffect(() => {
+    if (selectedMarketBuildingId !== null) setTooltipTile(null);
+  }, [selectedMarketBuildingId]);
+
+  const handleTileClick = useCallback(
+    (i: number) => {
+      const hasBuilding = buildingMap.get(i)?.buildingId ?? 0;
+      if (!hasBuilding && selectedMarketBuildingId === null) {
+        setTooltipTile(i);
+        return;
+      }
+      setTooltipTile(null);
+      onTileClick(i);
+    },
+    [buildingMap, selectedMarketBuildingId, onTileClick]
+  );
 
   const gridSize = 4;
 
@@ -51,7 +77,7 @@ export function GameBoard({ onTileClick }: GameBoardProps) {
         return (
           <Box
             key={i}
-            onClick={() => onTileClick(i)}
+            onClick={() => handleTileClick(i)}
             sx={{
               position: "relative",
               aspectRatio: "1",
@@ -153,6 +179,51 @@ export function GameBoard({ onTileClick }: GameBoardProps) {
                 +
               </Typography>
             )}
+            <AnimatePresence>
+              {tooltipTile === i && (
+                <motion.div
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  transition={{ duration: 0.2 }}
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    pointerEvents: "none",
+                    zIndex: 10,
+                  }}
+                >
+                  <Box
+                    sx={{
+                      bgcolor: "rgba(10, 16, 30, 0.92)",
+                      border: "1px solid rgba(66, 198, 255, 0.3)",
+                      borderRadius: "8px",
+                      px: 1,
+                      py: 0.5,
+                      backdropFilter: "blur(6px)",
+                    }}
+                  >
+                    <Typography
+                      sx={{
+                        fontSize: "0.6rem",
+                        color: "rgba(66, 198, 255, 0.85)",
+                        fontWeight: 600,
+                        whiteSpace: "nowrap",
+                        textAlign: "center",
+                        lineHeight: 1.3,
+                      }}
+                    >
+                      Select Building
+                      <br />
+                      From Market
+                    </Typography>
+                  </Box>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </Box>
         );
       })}
