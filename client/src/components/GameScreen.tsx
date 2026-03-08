@@ -80,7 +80,7 @@ export function GameScreen() {
 
   const handleTileClick = useCallback(
     (positionId: number) => {
-      const building = buildings.find((b) => b.positionId === positionId);
+      const building = buildings.find((b) => b.positionId === positionId && b.buildingId > 0);
 
       if (building) {
         setSelectedMarketBuildingId(null);
