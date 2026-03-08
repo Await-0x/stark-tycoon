@@ -192,7 +192,7 @@ pub fn building_spec(building_id: u8) -> BuildingSpec {
         // NFT Marketplace — 1.0 TPS
         BuildingSpec {
             capital_cost: 1200,
-            users_cost: 150,
+            users_cost: 450,
             capital_production: 0,
             users_production: 0,
             research_production: 0,
@@ -205,7 +205,7 @@ pub fn building_spec(building_id: u8) -> BuildingSpec {
         // Game Studio — 2.2 TPS
         BuildingSpec {
             capital_cost: 2500,
-            users_cost: 300,
+            users_cost: 900,
             capital_production: 0,
             users_production: 0,
             research_production: 0,
@@ -218,7 +218,7 @@ pub fn building_spec(building_id: u8) -> BuildingSpec {
         // Decentralized Exchange — 3.8 TPS
         BuildingSpec {
             capital_cost: 4000,
-            users_cost: 500,
+            users_cost: 1500,
             capital_production: 0,
             users_production: 0,
             research_production: 0,
@@ -231,7 +231,7 @@ pub fn building_spec(building_id: u8) -> BuildingSpec {
         // Social Platform — 5.0 TPS
         BuildingSpec {
             capital_cost: 5000,
-            users_cost: 700,
+            users_cost: 2100,
             capital_production: 0,
             users_production: 0,
             research_production: 0,
@@ -244,7 +244,7 @@ pub fn building_spec(building_id: u8) -> BuildingSpec {
         // Appchain Network — 7.0 TPS
         BuildingSpec {
             capital_cost: 7000,
-            users_cost: 1000,
+            users_cost: 3000,
             capital_production: 0,
             users_production: 0,
             research_production: 0,
@@ -337,7 +337,7 @@ pub fn building_spec(building_id: u8) -> BuildingSpec {
         // Arcade Machine — 1 TPS
         BuildingSpec {
             capital_cost: 1000,
-            users_cost: 100,
+            users_cost: 300,
             capital_production: 0,
             users_production: 0,
             research_production: 0,

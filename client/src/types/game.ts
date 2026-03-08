@@ -212,31 +212,31 @@ export const BUILDING_SPECS: Record<number, BuildingSpec> = {
   // Transaction Buildings (13-17)
   13: {
     id: 13, name: "NFT Marketplace", category: "transactions",
-    capitalCost: 1200, usersCost: 150,
+    capitalCost: 1200, usersCost: 450,
     capitalProduction: 0, usersProduction: 0, researchProduction: 0, txProduction: 1,
     usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0,
   },
   14: {
     id: 14, name: "Game Studio", category: "transactions",
-    capitalCost: 2500, usersCost: 300,
+    capitalCost: 2500, usersCost: 900,
     capitalProduction: 0, usersProduction: 0, researchProduction: 0, txProduction: 2,
     usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0,
   },
   15: {
     id: 15, name: "Decentralized Exchange", category: "transactions",
-    capitalCost: 4000, usersCost: 500,
+    capitalCost: 4000, usersCost: 1500,
     capitalProduction: 0, usersProduction: 0, researchProduction: 0, txProduction: 4,
     usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0,
   },
   16: {
     id: 16, name: "Social Platform", category: "transactions",
-    capitalCost: 5000, usersCost: 700,
+    capitalCost: 5000, usersCost: 2100,
     capitalProduction: 0, usersProduction: 0, researchProduction: 0, txProduction: 5,
     usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0,
   },
   17: {
     id: 17, name: "Appchain Network", category: "transactions",
-    capitalCost: 7000, usersCost: 1000,
+    capitalCost: 7000, usersCost: 3000,
     capitalProduction: 0, usersProduction: 0, researchProduction: 0, txProduction: 7,
     usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0,
   },
@@ -282,7 +282,7 @@ export const BUILDING_SPECS: Record<number, BuildingSpec> = {
   },
   24: {
     id: 24, name: "Arcade Machine", category: "additional",
-    capitalCost: 1000, usersCost: 100,
+    capitalCost: 1000, usersCost: 300,
     capitalProduction: 0, usersProduction: 0, researchProduction: 0, txProduction: 1,
     usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0,
   },

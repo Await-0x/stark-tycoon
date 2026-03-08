@@ -242,6 +242,13 @@ export const GameDirector = ({ children }: PropsWithChildren) => {
               return {
                 ...prev,
                 research: prev.research - upgrade.researchCost,
+                capitalProduction: prev.capitalProduction + upgrade.capitalProduction,
+                usersProduction: prev.usersProduction + upgrade.usersProduction,
+                researchProduction: prev.researchProduction + upgrade.researchProduction,
+                transactionsProduction: prev.transactionsProduction + upgrade.txProduction,
+                usersMultiplier: prev.usersMultiplier + upgrade.usersMultiplier,
+                researchMultiplier: prev.researchMultiplier + upgrade.researchMultiplier,
+                txMultiplier: prev.txMultiplier + upgrade.txMultiplier,
               };
             });
           }

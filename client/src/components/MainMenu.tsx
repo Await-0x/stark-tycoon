@@ -336,7 +336,7 @@ export function MainMenu() {
         </DialogContent>
       </Dialog>
 
-      <Leaderboard open={leaderboardOpen} onClose={() => setLeaderboardOpen(false)} />
+      {leaderboardOpen && <Leaderboard open onClose={() => setLeaderboardOpen(false)} />}
 
       {/* Loading overlay while game is being prepared */}
       {isStarting && (

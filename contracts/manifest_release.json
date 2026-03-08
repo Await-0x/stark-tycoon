@@ -34,7 +34,7 @@
   "contracts": [
     {
       "address": "0x7d98ec0e41cfe391ff9fbaec37cd19d6fc9975e8cf69aebdb36758c1b004e2",
-      "class_hash": "0x69afb165cc7bd83e596ef3e308b68bf1b12c3887c8d247f9cb5531192ec3cbf",
+      "class_hash": "0x739e1b3e92bddc6f3fee77d0c336c3d8fabb9520ca18920ff92a2047847f712",
       "init_calldata": [
         "0x0248f76e72088853c3fE96CAd8F7f075c9e514B862A6e9a3D5957EA5522eBb6D",
         "0x0142712722e62a38f9c40fcc904610e1a14c70125876ecaaf25d803556734467"
