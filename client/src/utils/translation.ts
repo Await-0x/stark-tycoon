@@ -15,9 +15,9 @@ const normalizeSelector = (sel: string | bigint): string => {
 };
 
 // ── Model selectors from manifest (namespaced by Dojo) ──
-const GAME_MODEL_NORMALIZED = normalizeSelector("0x50c98e95d2a76c5375bd2be3ada7eae0fab7db5223d387bf2d57224d2951857");
-const BUILDING_MODEL_NORMALIZED = normalizeSelector("0x32f231f41d3cd55910154451460f226af2c5c5a02da3ce56853d5b1ef47335f");
-const BOARD_MODEL_NORMALIZED = normalizeSelector("0x02500c08990c158d042249fe13fcf7eca212ff42a6605a3174f5ed3f3d9d9875");
+const GAME_MODEL_NORMALIZED = normalizeSelector("0x00210d04d219dd4aa700834162315f55ec5a1014afe479ada396a4c702307683");
+const BUILDING_MODEL_NORMALIZED = normalizeSelector("0x070449f70d2647d4d914350435ed6702dca99bc46cb55f81de792de4cdfeb301");
+const BOARD_MODEL_NORMALIZED = normalizeSelector("0x06f312b28cca0b15dc92182ef22763f751285892c73b969b6cc15f6b10f7c604");
 
 // ── Translated event types ──
 

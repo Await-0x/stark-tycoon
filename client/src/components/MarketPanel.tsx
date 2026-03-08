@@ -65,7 +65,7 @@ function MarketCard({
   const production = prodStats(spec);
   const capitalOk = resources.capital >= spec.capitalCost;
   const usersOk = resources.users >= spec.usersCost;
-  const dim = canAfford ? 1 : 0.45;
+  const dim = canAfford ? 1 : 0.6;
 
   return (
     <GlassPanel
@@ -84,20 +84,25 @@ function MarketCard({
         transition: "all 0.2s ease",
         overflow: "hidden",
         "&:hover": canAfford
-          ? { borderColor: "line.1", boxShadow: "0 0 8px rgba(66, 198, 255, 0.15)" }
+          ? {
+              borderColor: isSelected ? "#42C6FF" : "line.1",
+              boxShadow: isSelected
+                ? "0 0 16px rgba(66, 198, 255, 0.25), inset 0 0 12px rgba(66, 198, 255, 0.06)"
+                : "0 0 8px rgba(66, 198, 255, 0.15)",
+            }
           : {},
       }}
     >
       <Box onClick={canAfford ? onClick : undefined} sx={{ opacity: dim }}>
         {/* Row 1: image + name + cost → production */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1, p: 1, pb: 0.75 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, p: 1.25, pb: 1 }}>
           <Box
             component="img"
             src={getBuildingImage(spec.id)}
             alt={spec.name}
             sx={{
-              width: 36,
-              height: 36,
+              width: 44,
+              height: 44,
               objectFit: "contain",
               borderRadius: "6px",
               bgcolor: "rgba(14, 22, 40, 0.6)",
@@ -107,7 +112,7 @@ function MarketCard({
             }}
           />
           <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Typography sx={{ fontWeight: 700, fontSize: "0.85rem", lineHeight: 1.2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+            <Typography sx={{ fontWeight: 700, fontSize: "0.9rem", lineHeight: 1.2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
               {spec.name}
             </Typography>
             {/* Cost | Gain */}
