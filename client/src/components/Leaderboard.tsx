@@ -8,7 +8,7 @@ import Typography from "@mui/material/Typography";
 import CloseIcon from "@mui/icons-material/Close";
 import EmojiEventsRounded from "@mui/icons-material/EmojiEventsRounded";
 import { useTokens } from "@provable-games/denshokan-sdk/react";
-import { GAME_ADDRESS } from "@/utils/networkConfig";
+import { GAME_ADDRESS, DENSHOKAN_GAME_ID } from "@/utils/networkConfig";
 
 interface LeaderboardProps {
   open: boolean;
@@ -18,8 +18,9 @@ interface LeaderboardProps {
 export function Leaderboard({ open, onClose }: LeaderboardProps) {
   const { data: tokens, isLoading } = useTokens({
     gameAddress: GAME_ADDRESS,
+    gameId: DENSHOKAN_GAME_ID,
     gameOver: true,
-    limit: 50,
+    limit: 100,
   });
 
   const sorted = tokens?.data

@@ -281,8 +281,8 @@ export function MainMenu() {
         </DialogTitle>
         <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           <Section title="Goal">
-            Maximize amount of Transactions produced in a 20-minute session. Start with
-            200 Capital, buy buildings, upgrade them, and build the most
+            Maximize Transactions produced in a 15-minute session. Start with
+            2,000 Capital, buy buildings, upgrade them, and build the most
             productive network ecosystem you can.
           </Section>
 

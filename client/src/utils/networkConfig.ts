@@ -84,6 +84,9 @@ const _resolved = (() => {
 })();
 export const GAME_ADDRESS = _resolved;
 
+// Denshokan registry game ID for Stark Tycoon
+export const DENSHOKAN_GAME_ID = 14;
+
 export function getNetworkConfig(
   networkKey: string = ChainId.SN_SEPOLIA
 ): NetworkConfig {

@@ -9,7 +9,7 @@ import XIcon from "@mui/icons-material/X";
 import { useTokens } from "@provable-games/denshokan-sdk/react";
 import { useNavigate } from "react-router-dom";
 import { useGameStore } from "@/stores/gameStore";
-import { GAME_ADDRESS } from "@/utils/networkConfig";
+import { GAME_ADDRESS, DENSHOKAN_GAME_ID } from "@/utils/networkConfig";
 import { GlassPanel } from "./GlassPanel";
 
 export function GameEndOverlay() {
@@ -21,7 +21,7 @@ export function GameEndOverlay() {
   // Fetch completed games to compute rank (only when game ended)
   const { data: tokens, isLoading: rankLoading } = useTokens(
     gamePhase === "ended"
-      ? { gameAddress: GAME_ADDRESS, gameOver: true, limit: 100 }
+      ? { gameAddress: GAME_ADDRESS, gameId: DENSHOKAN_GAME_ID, gameOver: true, limit: 100 }
       : undefined
   );
 

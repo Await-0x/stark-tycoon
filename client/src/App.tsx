@@ -16,7 +16,7 @@ function App() {
     <BrowserRouter>
       <StyledEngineProvider injectFirst>
         <ThemeProvider theme={mainTheme}>
-          <DenshokanProvider config={{ chain: "sepolia" }}>
+          <DenshokanProvider config={{ chain: "sepolia", apiUrl: "https://denshokan-api-production.up.railway.app" }}>
             <SnackbarProvider
               anchorOrigin={{ vertical: "top", horizontal: "center" }}
               preventDuplicate
