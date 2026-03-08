@@ -51,6 +51,11 @@ function buildPolicies(gameAddress: string) {
             entrypoint: "upgrade_building",
           },
           {
+            name: "Refresh Market",
+            description: "Refresh all market buildings",
+            entrypoint: "refresh_market",
+          },
+          {
             name: "Submit Score",
             description: "Finalize game score after session ends",
             entrypoint: "submit_score",
@@ -75,7 +80,7 @@ function buildPolicies(gameAddress: string) {
 // Pre-resolved game address for use outside React (e.g. denshokan queries)
 const _resolved = (() => {
   const network = NETWORKS.SN_SEPOLIA;
-  return getContractByName(network.manifest, network.namespace, "ST_0_0_1-starktycoon")?.address ?? "";
+  return getContractByName(network.manifest, network.namespace, "starktycoon")?.address ?? "";
 })();
 export const GAME_ADDRESS = _resolved;
 
@@ -85,7 +90,7 @@ export function getNetworkConfig(
   const network = NETWORKS[networkKey as keyof typeof NETWORKS];
   if (!network) throw new Error(`Network ${networkKey} not found`);
 
-  const gameAddress = getContractByName(network.manifest, network.namespace, "ST_0_0_1-starktycoon")?.address
+  const gameAddress = getContractByName(network.manifest, network.namespace, "starktycoon")?.address
   const policies = buildPolicies(gameAddress);
 
   return {

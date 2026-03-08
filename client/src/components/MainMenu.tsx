@@ -349,7 +349,7 @@ export function MainMenu() {
             Preparing your game...
           </Typography>
           <Typography variant="body2" sx={{ opacity: 0.5 }}>
-            Confirming transaction on Starknet
+            Confirming transaction
           </Typography>
         </Box>
       )}

@@ -101,7 +101,7 @@ pub fn building_spec(building_id: u8) -> BuildingSpec {
             capital_cost: 250,
             users_cost: 0,
             capital_production: 0,
-            users_production: 8,
+            users_production: 2,
             research_production: 0,
             tx_production: 0,
             users_multiplier: 0,
@@ -114,7 +114,7 @@ pub fn building_spec(building_id: u8) -> BuildingSpec {
             capital_cost: 800,
             users_cost: 0,
             capital_production: 0,
-            users_production: 18,
+            users_production: 5,
             research_production: 0,
             tx_production: 0,
             users_multiplier: 0,
@@ -127,7 +127,7 @@ pub fn building_spec(building_id: u8) -> BuildingSpec {
             capital_cost: 1800,
             users_cost: 0,
             capital_production: 0,
-            users_production: 35,
+            users_production: 11,
             research_production: 0,
             tx_production: 0,
             users_multiplier: 0,
@@ -140,7 +140,7 @@ pub fn building_spec(building_id: u8) -> BuildingSpec {
             capital_cost: 1500,
             users_cost: 0,
             capital_production: 0,
-            users_production: 22,
+            users_production: 7,
             research_production: 0,
             tx_production: 0,
             users_multiplier: 0,
@@ -295,12 +295,12 @@ pub fn building_spec(building_id: u8) -> BuildingSpec {
         }
     } // ── ADDITIONAL BUILDINGS (21-25) ──
     else if building_id == 21 {
-        // Starknet Bridge — +20 Users/sec
+        // Starknet Bridge — +6 Users/sec
         BuildingSpec {
             capital_cost: 3500,
             users_cost: 0,
             capital_production: 0,
-            users_production: 20,
+            users_production: 6,
             research_production: 0,
             tx_production: 0,
             users_multiplier: 0,
@@ -321,12 +321,12 @@ pub fn building_spec(building_id: u8) -> BuildingSpec {
             tx_multiplier: 0,
         }
     } else if building_id == 23 {
-        // Wallet Provider — +25 Users/sec
+        // Wallet Provider — +8 Users/sec
         BuildingSpec {
             capital_cost: 2800,
             users_cost: 0,
             capital_production: 0,
-            users_production: 25,
+            users_production: 8,
             research_production: 0,
             tx_production: 0,
             users_multiplier: 0,
@@ -347,12 +347,12 @@ pub fn building_spec(building_id: u8) -> BuildingSpec {
             tx_multiplier: 0,
         }
     } else if building_id == 25 {
-        // Identity Protocol — +15 Users/sec
+        // Identity Protocol — +5 Users/sec
         BuildingSpec {
             capital_cost: 3200,
             users_cost: 0,
             capital_production: 0,
-            users_production: 15,
+            users_production: 5,
             research_production: 0,
             tx_production: 0,
             users_multiplier: 0,
@@ -515,7 +515,7 @@ pub fn upgrade_spec(building_id: u8, upgrade_id: u8) -> UpgradeSpec {
             UpgradeSpec {
                 research_cost: 200,
                 capital_production: 0,
-                users_production: 6,
+                users_production: 2,
                 research_production: 0,
                 tx_production: 0,
                 users_multiplier: 0,
@@ -527,7 +527,7 @@ pub fn upgrade_spec(building_id: u8, upgrade_id: u8) -> UpgradeSpec {
             UpgradeSpec {
                 research_cost: 400,
                 capital_production: 0,
-                users_production: 10,
+                users_production: 3,
                 research_production: 0,
                 tx_production: 0,
                 users_multiplier: 0,
@@ -542,7 +542,7 @@ pub fn upgrade_spec(building_id: u8, upgrade_id: u8) -> UpgradeSpec {
             UpgradeSpec {
                 research_cost: 300,
                 capital_production: 0,
-                users_production: 10,
+                users_production: 3,
                 research_production: 0,
                 tx_production: 0,
                 users_multiplier: 0,
@@ -554,7 +554,7 @@ pub fn upgrade_spec(building_id: u8, upgrade_id: u8) -> UpgradeSpec {
             UpgradeSpec {
                 research_cost: 700,
                 capital_production: 0,
-                users_production: 15,
+                users_production: 5,
                 research_production: 0,
                 tx_production: 0,
                 users_multiplier: 0,
@@ -569,7 +569,7 @@ pub fn upgrade_spec(building_id: u8, upgrade_id: u8) -> UpgradeSpec {
             UpgradeSpec {
                 research_cost: 600,
                 capital_production: 0,
-                users_production: 20,
+                users_production: 6,
                 research_production: 0,
                 tx_production: 0,
                 users_multiplier: 0,
@@ -581,7 +581,7 @@ pub fn upgrade_spec(building_id: u8, upgrade_id: u8) -> UpgradeSpec {
             UpgradeSpec {
                 research_cost: 1200,
                 capital_production: 0,
-                users_production: 30,
+                users_production: 9,
                 research_production: 0,
                 tx_production: 0,
                 users_multiplier: 0,
@@ -596,7 +596,7 @@ pub fn upgrade_spec(building_id: u8, upgrade_id: u8) -> UpgradeSpec {
             UpgradeSpec {
                 research_cost: 500,
                 capital_production: 0,
-                users_production: 12,
+                users_production: 4,
                 research_production: 0,
                 tx_production: 0,
                 users_multiplier: 0,
@@ -608,7 +608,7 @@ pub fn upgrade_spec(building_id: u8, upgrade_id: u8) -> UpgradeSpec {
             UpgradeSpec {
                 research_cost: 1000,
                 capital_production: 0,
-                users_production: 20,
+                users_production: 6,
                 research_production: 0,
                 tx_production: 0,
                 users_multiplier: 0,
@@ -924,7 +924,7 @@ pub fn upgrade_spec(building_id: u8, upgrade_id: u8) -> UpgradeSpec {
             UpgradeSpec {
                 research_cost: 1200,
                 capital_production: 0,
-                users_production: 15,
+                users_production: 5,
                 research_production: 0,
                 tx_production: 0,
                 users_multiplier: 0,
@@ -936,7 +936,7 @@ pub fn upgrade_spec(building_id: u8, upgrade_id: u8) -> UpgradeSpec {
             UpgradeSpec {
                 research_cost: 2800,
                 capital_production: 0,
-                users_production: 25,
+                users_production: 8,
                 research_production: 0,
                 tx_production: 0,
                 users_multiplier: 0,
@@ -978,7 +978,7 @@ pub fn upgrade_spec(building_id: u8, upgrade_id: u8) -> UpgradeSpec {
             UpgradeSpec {
                 research_cost: 900,
                 capital_production: 0,
-                users_production: 18,
+                users_production: 5,
                 research_production: 0,
                 tx_production: 0,
                 users_multiplier: 0,
@@ -990,7 +990,7 @@ pub fn upgrade_spec(building_id: u8, upgrade_id: u8) -> UpgradeSpec {
             UpgradeSpec {
                 research_cost: 2200,
                 capital_production: 0,
-                users_production: 28,
+                users_production: 8,
                 research_production: 0,
                 tx_production: 0,
                 users_multiplier: 0,
@@ -1032,7 +1032,7 @@ pub fn upgrade_spec(building_id: u8, upgrade_id: u8) -> UpgradeSpec {
             UpgradeSpec {
                 research_cost: 1200,
                 capital_production: 0,
-                users_production: 12,
+                users_production: 4,
                 research_production: 0,
                 tx_production: 0,
                 users_multiplier: 0,
@@ -1044,7 +1044,7 @@ pub fn upgrade_spec(building_id: u8, upgrade_id: u8) -> UpgradeSpec {
             UpgradeSpec {
                 research_cost: 2800,
                 capital_production: 0,
-                users_production: 20,
+                users_production: 6,
                 research_production: 0,
                 tx_production: 0,
                 users_multiplier: 0,

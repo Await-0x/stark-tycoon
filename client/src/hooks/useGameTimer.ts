@@ -15,7 +15,9 @@ export function useGameTimer(): GameTimerResult {
 
   const calcRemaining = useCallback(() => {
     if (!gameState) return GAME_DURATION;
-    const elapsed = Math.floor(Date.now() / 1000) - gameState.mintedAt;
+    // Lag 1s behind wall clock so the timer expires only after the
+    // contract considers the game over (block timestamp trails Date.now).
+    const elapsed = Math.floor(Date.now() / 1000) - 1 - gameState.mintedAt;
     return Math.max(0, GAME_DURATION - elapsed);
   }, [gameState]);
 

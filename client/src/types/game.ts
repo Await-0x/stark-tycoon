@@ -2,10 +2,10 @@
 
 export const BOARD_SIZE = 25;
 export const GAME_DURATION = 1200;
-export const MARKET_SIZE = 5;
+export const MARKET_SIZE = 6;
 export const TOTAL_BUILDINGS = 25;
-export const START_CAPITAL = 200;
-export const START_CAPITAL_PRODUCTION = 1;
+export const START_CAPITAL = 2000;
+export const START_CAPITAL_PRODUCTION = 5;
 
 
 // ── Resource Types ──
@@ -79,6 +79,7 @@ export interface GameState {
   txMultiplier: number;
   gameTime: number;
   marketPacked: bigint;
+  refreshCount: number;
 }
 
 // ── Game Actions ──
@@ -102,6 +103,11 @@ export interface UpgradeBuildingAction {
   upgradeId: number;
 }
 
+export interface RefreshMarketAction {
+  type: "refresh_market";
+  gameId: string;
+}
+
 export interface SubmitScoreAction {
   type: "submit_score";
   gameId: string;
@@ -111,6 +117,7 @@ export type GameAction =
   | StartGameAction
   | BuyBuildingAction
   | UpgradeBuildingAction
+  | RefreshMarketAction
   | SubmitScoreAction;
 
 // ── Building Specs (all 25 buildings) ──
@@ -152,25 +159,25 @@ export const BUILDING_SPECS: Record<number, BuildingSpec> = {
   6: {
     id: 6, name: "Account Portal", category: "users",
     capitalCost: 250, usersCost: 0,
-    capitalProduction: 0, usersProduction: 8, researchProduction: 0, txProduction: 0,
+    capitalProduction: 0, usersProduction: 2, researchProduction: 0, txProduction: 0,
     usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0,
   },
   7: {
     id: 7, name: "Growth Hub", category: "users",
     capitalCost: 800, usersCost: 0,
-    capitalProduction: 0, usersProduction: 18, researchProduction: 0, txProduction: 0,
+    capitalProduction: 0, usersProduction: 5, researchProduction: 0, txProduction: 0,
     usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0,
   },
   8: {
     id: 8, name: "Community Hub", category: "users",
     capitalCost: 1800, usersCost: 0,
-    capitalProduction: 0, usersProduction: 35, researchProduction: 0, txProduction: 0,
+    capitalProduction: 0, usersProduction: 11, researchProduction: 0, txProduction: 0,
     usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0,
   },
   9: {
     id: 9, name: "Developer Relations", category: "users",
     capitalCost: 1500, usersCost: 0,
-    capitalProduction: 0, usersProduction: 22, researchProduction: 0, txProduction: 0,
+    capitalProduction: 0, usersProduction: 7, researchProduction: 0, txProduction: 0,
     usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0,
   },
 
@@ -250,7 +257,7 @@ export const BUILDING_SPECS: Record<number, BuildingSpec> = {
   21: {
     id: 21, name: "Starknet Bridge", category: "additional",
     capitalCost: 3500, usersCost: 0,
-    capitalProduction: 0, usersProduction: 20, researchProduction: 0, txProduction: 0,
+    capitalProduction: 0, usersProduction: 6, researchProduction: 0, txProduction: 0,
     usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0,
   },
   22: {
@@ -262,7 +269,7 @@ export const BUILDING_SPECS: Record<number, BuildingSpec> = {
   23: {
     id: 23, name: "Wallet Provider", category: "additional",
     capitalCost: 2800, usersCost: 0,
-    capitalProduction: 0, usersProduction: 25, researchProduction: 0, txProduction: 0,
+    capitalProduction: 0, usersProduction: 8, researchProduction: 0, txProduction: 0,
     usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0,
   },
   24: {
@@ -274,7 +281,7 @@ export const BUILDING_SPECS: Record<number, BuildingSpec> = {
   25: {
     id: 25, name: "Identity Protocol", category: "additional",
     capitalCost: 3200, usersCost: 0,
-    capitalProduction: 0, usersProduction: 15, researchProduction: 0, txProduction: 0,
+    capitalProduction: 0, usersProduction: 5, researchProduction: 0, txProduction: 0,
     usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0,
   },
 };
@@ -306,20 +313,20 @@ export const UPGRADE_SPECS: Record<number, [UpgradeSpec, UpgradeSpec]> = {
 
   // User Buildings
   6: [
-    { name: "Burner Wallets", researchCost: 200, capitalProduction: 0, usersProduction: 6, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
-    { name: "Account Abstraction", researchCost: 400, capitalProduction: 0, usersProduction: 10, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+    { name: "Burner Wallets", researchCost: 200, capitalProduction: 0, usersProduction: 2, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+    { name: "Account Abstraction", researchCost: 400, capitalProduction: 0, usersProduction: 3, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
   ],
   7: [
-    { name: "Referral Engine", researchCost: 300, capitalProduction: 0, usersProduction: 10, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
-    { name: "Regional Expansion", researchCost: 700, capitalProduction: 0, usersProduction: 15, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+    { name: "Referral Engine", researchCost: 300, capitalProduction: 0, usersProduction: 3, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+    { name: "Regional Expansion", researchCost: 700, capitalProduction: 0, usersProduction: 5, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
   ],
   8: [
-    { name: "Ambassador Program", researchCost: 600, capitalProduction: 0, usersProduction: 20, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
-    { name: "Global Campaign", researchCost: 1200, capitalProduction: 0, usersProduction: 30, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+    { name: "Ambassador Program", researchCost: 600, capitalProduction: 0, usersProduction: 6, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+    { name: "Global Campaign", researchCost: 1200, capitalProduction: 0, usersProduction: 9, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
   ],
   9: [
-    { name: "Dev Grants", researchCost: 500, capitalProduction: 0, usersProduction: 12, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
-    { name: "Hackathon Series", researchCost: 1000, capitalProduction: 0, usersProduction: 20, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+    { name: "Dev Grants", researchCost: 500, capitalProduction: 0, usersProduction: 4, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+    { name: "Hackathon Series", researchCost: 1000, capitalProduction: 0, usersProduction: 6, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
   ],
 
   // Research Buildings
@@ -374,24 +381,24 @@ export const UPGRADE_SPECS: Record<number, [UpgradeSpec, UpgradeSpec]> = {
 
   // Additional Buildings
   21: [
-    { name: "Shared Liquidity Network", researchCost: 1200, capitalProduction: 0, usersProduction: 15, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
-    { name: "Fast Withdrawal System", researchCost: 2800, capitalProduction: 0, usersProduction: 25, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+    { name: "Shared Liquidity Network", researchCost: 1200, capitalProduction: 0, usersProduction: 5, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+    { name: "Fast Withdrawal System", researchCost: 2800, capitalProduction: 0, usersProduction: 8, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
   ],
   22: [
     { name: "High Throughput RPC", researchCost: 800, capitalProduction: 0, usersProduction: 0, researchProduction: 10, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
     { name: "Geo-Distributed Nodes", researchCost: 2000, capitalProduction: 0, usersProduction: 0, researchProduction: 18, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
   ],
   23: [
-    { name: "Embedded Wallet SDK", researchCost: 900, capitalProduction: 0, usersProduction: 18, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
-    { name: "Smart Account Recovery", researchCost: 2200, capitalProduction: 0, usersProduction: 28, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+    { name: "Embedded Wallet SDK", researchCost: 900, capitalProduction: 0, usersProduction: 5, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+    { name: "Smart Account Recovery", researchCost: 2200, capitalProduction: 0, usersProduction: 8, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
   ],
   24: [
     { name: "Traditional Payments", researchCost: 1800, capitalProduction: 0, usersProduction: 0, researchProduction: 0, txProduction: 2, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
     { name: "No Token Onboarding", researchCost: 3500, capitalProduction: 0, usersProduction: 0, researchProduction: 0, txProduction: 3, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
   ],
   25: [
-    { name: "Human Verification Layer", researchCost: 1200, capitalProduction: 0, usersProduction: 12, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
-    { name: "Universal Profile System", researchCost: 2800, capitalProduction: 0, usersProduction: 20, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+    { name: "Human Verification Layer", researchCost: 1200, capitalProduction: 0, usersProduction: 4, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
+    { name: "Universal Profile System", researchCost: 2800, capitalProduction: 0, usersProduction: 6, researchProduction: 0, txProduction: 0, usersMultiplier: 0, researchMultiplier: 0, txMultiplier: 0 },
   ],
 };
 

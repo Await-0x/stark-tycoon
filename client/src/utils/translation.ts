@@ -4,27 +4,19 @@ import { hash } from "starknet";
 // ── Register events emitted by the contract ──
 // Dojo model writes are captured as StoreSetRecord events.
 // The Game and Building models are the primary state-carrying events.
-const EVENT_NAMES = ["StoreSetRecord"] as const;
-type SupportedEventName = (typeof EVENT_NAMES)[number];
-
-const SELECTOR_TO_NAME = new Map<string, SupportedEventName>();
-for (const name of EVENT_NAMES) {
-  const selector = hash.getSelectorFromName(name);
-  const normalized = `0x${BigInt(selector).toString(16).padStart(64, "0")}`;
-  SELECTOR_TO_NAME.set(normalized, name);
-}
+const STORE_SET_RECORD_SELECTOR = (() => {
+  const sel = hash.getSelectorFromName("StoreSetRecord");
+  return `0x${BigInt(sel).toString(16).padStart(64, "0")}`;
+})();
 
 const normalizeSelector = (sel: string | bigint): string => {
   const v = typeof sel === "string" ? BigInt(sel) : sel;
   return `0x${v.toString(16).padStart(64, "0")}`;
 };
 
-// ── Model selectors for Dojo StoreSetRecord events ──
-const GAME_MODEL_SELECTOR = hash.getSelectorFromName("Game");
-const GAME_MODEL_NORMALIZED = `0x${BigInt(GAME_MODEL_SELECTOR).toString(16).padStart(64, "0")}`;
-
-const BUILDING_MODEL_SELECTOR = hash.getSelectorFromName("Building");
-const BUILDING_MODEL_NORMALIZED = `0x${BigInt(BUILDING_MODEL_SELECTOR).toString(16).padStart(64, "0")}`;
+// ── Model selectors from manifest (namespaced by Dojo) ──
+const GAME_MODEL_NORMALIZED = normalizeSelector("0x50c98e95d2a76c5375bd2be3ada7eae0fab7db5223d387bf2d57224d2951857");
+const BUILDING_MODEL_NORMALIZED = normalizeSelector("0x32f231f41d3cd55910154451460f226af2c5c5a02da3ce56853d5b1ef47335f");
 
 // ── Translated event types ──
 
@@ -61,7 +53,7 @@ function decodeGameState(
   keys: string[],
   values: string[]
 ): GameStateTranslation | null {
-  if (values.length < 14) return null;
+  if (values.length < 15) return null;
 
   return {
     componentName: "GameState",
@@ -80,8 +72,9 @@ function decodeGameState(
       researchMultiplier: hexToNumber(values[9]),
       txMultiplier: hexToNumber(values[10]),
       gameTime: hexToNumber(values[11]),
-      // market_size at values[12], market_packed at values[13]
+      // market_size at values[12], market_packed at values[13], refresh_count at values[14]
       marketPacked: hexToBigInt(values[13]),
+      refreshCount: hexToNumber(values[14]),
     },
   };
 }
@@ -119,29 +112,28 @@ export const translateGameEvent = (
 ): TranslatedGameEvent[] => {
   if (!event.keys?.[0]) return [];
 
-  const eventName = SELECTOR_TO_NAME.get(
-    normalizeSelector(event.keys[0])
-  );
+  const eventSelector = normalizeSelector(event.keys[0]);
+  if (eventSelector !== STORE_SET_RECORD_SELECTOR) return [];
 
-  if (!eventName) return [];
-  if (eventName !== "StoreSetRecord") return [];
-
-  // StoreSetRecord keys layout: [selector, model_selector, ...entity_keys]
-  // StoreSetRecord data layout: [...field_values]
+  // StoreSetRecord keys layout: [event_selector, model_selector, ...entity_key_hashes]
+  // StoreSetRecord data layout: [keys_len, ...entity_keys, values_len, ...field_values]
   const modelSelector =
     event.keys?.[1] != null ? normalizeSelector(event.keys[1]) : "";
-  const entityKeys = (event.keys?.slice(2) ?? []).map((k) =>
-    typeof k === "bigint" ? `0x${k.toString(16)}` : String(k)
-  );
   const data = event.data ?? [];
 
+  // Parse data: extract entity keys and field values
+  const keysLen = Number(BigInt(data[0] || "0x0"));
+  const entityKeys = data.slice(1, 1 + keysLen);
+  const valuesLen = Number(BigInt(data[1 + keysLen] || "0x0"));
+  const values = data.slice(2 + keysLen, 2 + keysLen + valuesLen);
+
   if (modelSelector === GAME_MODEL_NORMALIZED) {
-    const result = decodeGameState(entityKeys, data);
+    const result = decodeGameState(entityKeys, values);
     return result ? [result] : [];
   }
 
   if (modelSelector === BUILDING_MODEL_NORMALIZED) {
-    const result = decodeBuildingUpdate(entityKeys, data);
+    const result = decodeBuildingUpdate(entityKeys, values);
     return result ? [result] : [];
   }
 

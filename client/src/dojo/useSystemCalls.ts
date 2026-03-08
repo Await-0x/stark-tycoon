@@ -1,15 +1,16 @@
+import { useController } from "@/contexts/controller";
 import { useDynamicConnector } from "@/contexts/starknet";
 import type { Building, GameState } from "@/types/game";
 import { GAME_ADDRESS as RESOLVED_GAME_ADDRESS, VRF_PROVIDER, getNetworkConfig } from "@/utils/networkConfig";
 import type { TranslatedGameEvent } from "@/utils/translation";
 import { translateGameEvent } from "@/utils/translation";
-import { useAccount } from "@starknet-react/core";
+import { stringToFelt } from "@/utils/utils";
 import { useSnackbar } from "notistack";
 import type { Call } from "starknet";
-import { CallData, hash } from "starknet";
+import { CairoOption, CairoOptionVariant, CallData, hash } from "starknet";
 
 export const useSystemCalls = () => {
-  const { account } = useAccount();
+  const { account } = useController();
   const { enqueueSnackbar } = useSnackbar();
   const { currentNetworkConfig } = useDynamicConnector();
 
@@ -109,11 +110,9 @@ export const useSystemCalls = () => {
     calls.push({
       contractAddress: GAME_ADDRESS,
       entrypoint: "start_game",
-      calldata: CallData.compile(
-        playerName
-          ? { player_name: { Some: playerName } }
-          : { player_name: { None: true } }
-      ),
+      calldata: CallData.compile([
+        new CairoOption(CairoOptionVariant.Some, stringToFelt(playerName ?? "Player")),
+      ]),
     });
     return calls;
   };
@@ -144,6 +143,16 @@ export const useSystemCalls = () => {
         calldata: CallData.compile([gameId, positionId, upgradeId]),
       },
     ];
+  };
+
+  const refreshMarket = (gameId: string): Call[] => {
+    const calls: Call[] = [requestRandom()];
+    calls.push({
+      contractAddress: GAME_ADDRESS,
+      entrypoint: "refresh_market",
+      calldata: CallData.compile([gameId]),
+    });
+    return calls;
   };
 
   const submitScore = (gameId: string): Call[] => {
@@ -179,8 +188,10 @@ export const useSystemCalls = () => {
       ) as { data: string[]; from_address: string } | undefined;
       const gameTokenId = tokenMetadataEvent
         ? tokenMetadataEvent.data[tokenMetadataEvent.data.length - 1]
-        : undefined;
+          : undefined;
 
+      console.log("events", events);
+      console.log("tokenMetadataEvent", tokenMetadataEvent);
       if (!gameTokenId) {
         enqueueSnackbar("Failed to get game ID", { variant: "error" });
         return null;
@@ -196,6 +207,8 @@ export const useSystemCalls = () => {
         .flat()
         .filter(Boolean) as TranslatedGameEvent[];
 
+      console.log("translatedEvents", translatedEvents);
+      console.log("gameTokenId", gameTokenId);
       return { events: translatedEvents, gameTokenId };
     } catch (error) {
       console.error("Error starting game:", error);
@@ -225,6 +238,7 @@ export const useSystemCalls = () => {
     startGame,
     buyBuilding,
     upgradeBuilding,
+    refreshMarket,
     submitScore,
   };
 };
@@ -261,7 +275,7 @@ export async function fetchGameState(
     });
 
     const data = await response.json();
-    if (!data?.result || data.result.length < 16) return null;
+    if (!data?.result || data.result.length < 17) return null;
 
     const r = data.result;
     const hex = (v: string) => parseInt(v, 16);
@@ -281,12 +295,13 @@ export async function fetchGameState(
       txMultiplier: hex(r[11]),
       gameTime: hex(r[12]),
       marketPacked: BigInt(r[14]),
+      refreshCount: hex(r[15]),
     };
 
-    const buildingsCount = hex(r[15]);
+    const buildingsCount = hex(r[16]);
     const buildings: Building[] = [];
     for (let i = 0; i < buildingsCount; i++) {
-      const base = 16 + i * 4;
+      const base = 17 + i * 4;
       buildings.push({
         gameId: r[base],
         positionId: hex(r[base + 1]),

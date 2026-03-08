@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
+import RefreshRounded from "@mui/icons-material/RefreshRounded";
 import AccountBalanceRounded from "@mui/icons-material/AccountBalanceRounded";
 import GroupRounded from "@mui/icons-material/GroupRounded";
 import ScienceRounded from "@mui/icons-material/ScienceRounded";
@@ -11,6 +12,7 @@ import { BUILDING_SPECS, UPGRADE_SPECS, getMarketBuildings } from "@/types/game"
 import type { BuildingSpec, UpgradeSpec } from "@/types/game";
 import { getBuildingImage } from "@/utils/buildingImages";
 import { useGameStore } from "@/stores/gameStore";
+import { useGameDirector } from "@/contexts/GameDirector";
 import { useResourceTicker } from "@/hooks/useResourceTicker";
 import { GlassPanel } from "./GlassPanel";
 
@@ -152,8 +154,8 @@ function MarketCard({
           </Box>
         </Box>
 
-        {/* Upgrade rows */}
-        {upgrades && (
+        {/* Upgrade rows – only visible when selected */}
+        {upgrades && isSelected && (
           <Box sx={{ borderTop: "1px solid rgba(110, 190, 255, 0.08)", px: 1, py: 0.5, display: "flex", flexDirection: "column", gap: 0.25 }}>
             <Typography sx={{ fontSize: "0.6rem", fontWeight: 600, color: "text.secondary", textTransform: "uppercase", letterSpacing: "0.05em" }}>
               Upgrades
@@ -195,11 +197,24 @@ function MarketCard({
 
 export function MarketPanel() {
   const gameState = useGameStore((s) => s.gameState);
+  const gameId = useGameStore((s) => s.gameId);
   const selectedMarketBuildingId = useGameStore((s) => s.selectedMarketBuildingId);
   const setSelectedMarketBuildingId = useGameStore((s) => s.setSelectedMarketBuildingId);
   const setSelectedPosition = useGameStore((s) => s.setSelectedPosition);
   const loadingMarketSlot = useGameStore((s) => s.loadingMarketSlot);
+  const loadingMarketRefresh = useGameStore((s) => s.loadingMarketRefresh);
+  const actionInProgress = useGameStore((s) => s.actionInProgress);
+  const { executeGameAction } = useGameDirector();
   const resources = useResourceTicker();
+
+  const refreshCount = gameState?.refreshCount ?? 0;
+  const refreshCost = refreshCount * 500;
+  const canAffordRefresh = resources.capital >= refreshCost && !actionInProgress;
+
+  const handleRefresh = () => {
+    if (!gameId || !canAffordRefresh) return;
+    executeGameAction({ type: "refresh_market", gameId });
+  };
 
   const marketBuildings = useMemo(() => {
     if (!gameState) return [];
@@ -219,12 +234,41 @@ export function MarketPanel() {
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-      <Typography variant="subtitle2" sx={{ color: "text.secondary", px: 0.5 }}>
-        Market
-      </Typography>
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", px: 0.5 }}>
+        <Typography variant="subtitle2" sx={{ color: "text.secondary" }}>
+          Market
+        </Typography>
+        <Box
+          onClick={canAffordRefresh ? handleRefresh : undefined}
+          sx={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 0.5,
+            cursor: canAffordRefresh ? "pointer" : "default",
+            opacity: canAffordRefresh ? 1 : 0.45,
+            bgcolor: "rgba(66, 198, 255, 0.08)",
+            border: "1px solid rgba(66, 198, 255, 0.2)",
+            borderRadius: "6px",
+            px: 1,
+            py: 0.25,
+            transition: "all 0.2s ease",
+            "&:hover": canAffordRefresh
+              ? { bgcolor: "rgba(66, 198, 255, 0.15)", borderColor: "rgba(66, 198, 255, 0.4)" }
+              : {},
+          }}
+        >
+          <RefreshRounded sx={{ fontSize: 14, color: "#42C6FF" }} />
+          <Typography sx={{ fontSize: "0.7rem", fontWeight: 600, color: refreshCost === 0 ? "#4ADE80" : "#42C6FF" }}>
+            {refreshCost === 0 ? "FREE" : refreshCost.toLocaleString()}
+          </Typography>
+          {refreshCost > 0 && (
+            <AccountBalanceRounded sx={{ fontSize: 11, color: "#FFD54F" }} />
+          )}
+        </Box>
+      </Box>
 
       {marketBuildings.map((spec, idx) => {
-        if (idx === loadingMarketSlot) {
+        if (idx === loadingMarketSlot || loadingMarketRefresh) {
           return (
             <GlassPanel
               key={`loading-${idx}`}

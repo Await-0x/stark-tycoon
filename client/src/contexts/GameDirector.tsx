@@ -45,6 +45,7 @@ export const GameDirector = ({ children }: PropsWithChildren) => {
     setGamePhase,
     setFinalScore,
     setLoadingMarketSlot,
+    setLoadingMarketRefresh,
     setSelectedMarketBuildingId,
     setSelectedPosition,
     addNotification,
@@ -54,6 +55,7 @@ export const GameDirector = ({ children }: PropsWithChildren) => {
     startGame,
     buyBuilding,
     upgradeBuilding,
+    refreshMarket,
     submitScore,
   } = useSystemCalls();
   const [searchParams] = useSearchParams();
@@ -220,6 +222,22 @@ export const GameDirector = ({ children }: PropsWithChildren) => {
         break;
       }
 
+      case "refresh_market": {
+        setActionInProgress(true);
+        // Optimistic: deduct cost
+        const refreshCount = prevGameState?.refreshCount ?? 0;
+        const refreshCost = refreshCount * 500;
+        if (refreshCost > 0) {
+          setGameState((prev) => {
+            if (!prev) return prev;
+            return { ...prev, capital: prev.capital - refreshCost };
+          });
+        }
+        setLoadingMarketRefresh(true);
+        txs.push(...refreshMarket(action.gameId));
+        break;
+      }
+
       case "submit_score":
         setActionInProgress(true);
         setGamePhase("submitting");
@@ -233,6 +251,7 @@ export const GameDirector = ({ children }: PropsWithChildren) => {
       if (prevGameState) setGameState(prevGameState);
       setBuildings(prevBuildings);
       setLoadingMarketSlot(null);
+      setLoadingMarketRefresh(false);
       if (action.type === "submit_score") setGamePhase("playing");
       setActionFailed();
       addNotification({ type: "error", message: "Action failed" });
@@ -241,6 +260,7 @@ export const GameDirector = ({ children }: PropsWithChildren) => {
 
     applyGameStateEvents(events);
     setLoadingMarketSlot(null);
+    setLoadingMarketRefresh(false);
     setActionInProgress(false);
 
     if (action.type === "start_game") {
@@ -253,6 +273,8 @@ export const GameDirector = ({ children }: PropsWithChildren) => {
       });
     } else if (action.type === "upgrade_building") {
       addNotification({ type: "success", message: "Upgrade applied!" });
+    } else if (action.type === "refresh_market") {
+      addNotification({ type: "success", message: "Market refreshed!" });
     } else if (action.type === "submit_score") {
       const finalState = useGameStore.getState().gameState;
       setFinalScore(finalState?.transactions ?? 0);

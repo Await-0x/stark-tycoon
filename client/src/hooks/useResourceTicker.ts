@@ -23,7 +23,9 @@ export function useResourceTicker(): InterpolatedResources {
     if (!gameState) return;
 
     const tick = () => {
-      const now = Math.floor(Date.now() / 1000);
+      // Lag 1s behind wall clock so the client never shows values
+      // the contract hasn't reached yet (block timestamp trails Date.now).
+      const now = Math.floor(Date.now() / 1000) - 1;
       setResources(interpolateResources(gameState, now));
     };
 

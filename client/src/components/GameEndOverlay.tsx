@@ -35,7 +35,7 @@ export function GameEndOverlay() {
 
   const handleShareOnX = () => {
     const rankText = rank ? ` Ranked #${rank}!` : "";
-    const text = `I scored ${finalScore ?? 0} transactions in Stark Tycoon!${rankText} Can you beat my score? https://starktycoon.com`;
+    const text = `I scored ${finalScore ?? 0} transactions in Stark Tycoon!${rankText}`;
     window.open(
       `https://x.com/intent/tweet?text=${encodeURIComponent(text)}`,
       "_blank"
@@ -57,7 +57,7 @@ export function GameEndOverlay() {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        gap: 3,
+        gap: 2,
         bgcolor: "rgba(7, 10, 18, 0.92)",
         backdropFilter: "blur(8px)",
       }}
@@ -90,7 +90,7 @@ export function GameEndOverlay() {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            gap: 3,
+            gap: 2,
             p: 4,
           }}
         >
@@ -124,7 +124,7 @@ export function GameEndOverlay() {
                 {finalScore ?? 0}
               </Typography>
             </Box>
-            <Typography variant="body2" sx={{ opacity: 0.7 }}>
+            <Typography variant="body1" sx={{ opacity: 0.8 }}>
               Transactions
             </Typography>
           </Box>
@@ -157,7 +157,7 @@ export function GameEndOverlay() {
             startIcon={<XIcon />}
             onClick={handleShareOnX}
           >
-            Share on X
+            Share
           </Button>
 
           <Button

@@ -22,6 +22,7 @@ pub struct Game {
     // Market
     pub market_size: u8,
     pub market_packed: u64,
+    pub refresh_count: u8,
 }
 
 #[derive(IntrospectPacked, Copy, Drop, Serde, Debug)]

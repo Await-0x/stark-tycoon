@@ -21,6 +21,7 @@ interface GameStoreState {
   selectedPosition: number | null;
   selectedMarketBuildingId: number | null;
   loadingMarketSlot: number | null;
+  loadingMarketRefresh: boolean;
   notifications: GameNotification[];
 
   // Setters
@@ -37,6 +38,7 @@ interface GameStoreState {
   setSelectedPosition: (pos: number | null) => void;
   setSelectedMarketBuildingId: (id: number | null) => void;
   setLoadingMarketSlot: (slot: number | null) => void;
+  setLoadingMarketRefresh: (loading: boolean) => void;
   addNotification: (notification: Omit<GameNotification, "id">) => void;
   removeNotification: (id: string) => void;
 
@@ -54,6 +56,7 @@ export const useGameStore = create<GameStoreState>((set) => ({
   selectedPosition: null,
   selectedMarketBuildingId: null,
   loadingMarketSlot: null,
+  loadingMarketRefresh: false,
   notifications: [],
 
   setGameId: (id) => set({ gameId: id }),
@@ -75,6 +78,7 @@ export const useGameStore = create<GameStoreState>((set) => ({
   setSelectedPosition: (pos) => set({ selectedPosition: pos }),
   setSelectedMarketBuildingId: (id) => set({ selectedMarketBuildingId: id }),
   setLoadingMarketSlot: (slot) => set({ loadingMarketSlot: slot }),
+  setLoadingMarketRefresh: (loading) => set({ loadingMarketRefresh: loading }),
 
   addNotification: (notification) => {
     const id = `notif-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
@@ -104,6 +108,7 @@ export const useGameStore = create<GameStoreState>((set) => ({
       selectedPosition: null,
       selectedMarketBuildingId: null,
       loadingMarketSlot: null,
+      loadingMarketRefresh: false,
       notifications: [],
     }),
 }));

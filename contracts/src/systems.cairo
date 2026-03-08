@@ -2,9 +2,10 @@ use crate::models::{Building, Game};
 
 #[starknet::interface]
 pub trait IStarktycoonActions<T> {
-    fn start_game(ref self: T, player_name: Option<felt252>);
+    fn start_game(ref self: T, player_name: Option<felt252>) -> felt252;
     fn buy_building(ref self: T, game_id: felt252, building_id: u8, position_id: u8);
     fn upgrade_building(ref self: T, game_id: felt252, position_id: u8, upgrade_id: u8);
+    fn refresh_market(ref self: T, game_id: felt252);
     fn submit_score(ref self: T, game_id: felt252);
     fn get_game_state(self: @T, game_id: felt252) -> (Game, Span<Building>);
 }
@@ -90,7 +91,7 @@ pub mod starktycoon {
 
     #[abi(embed_v0)]
     impl StarktycoonActionsImpl of super::IStarktycoonActions<ContractState> {
-        fn start_game(ref self: ContractState, player_name: Option<felt252>) {
+        fn start_game(ref self: ContractState, player_name: Option<felt252>) -> felt252 {
             let mut world = self.world_default();
             let current_time = get_block_timestamp();
 
@@ -120,6 +121,7 @@ pub mod starktycoon {
             game.market_packed = market::pack_market_from_seed(VRFImpl::seed(), MARKET_SIZE);
 
             world.write_model(@game);
+            game_id
         }
 
         fn buy_building(
@@ -223,6 +225,27 @@ pub mod starktycoon {
             // Advance upgrade level
             building.upgrade_level = upgrade_id;
             world.write_model(@building);
+            world.write_model(@game);
+            post_action(denshokan_address, game_id);
+        }
+
+        fn refresh_market(ref self: ContractState, game_id: felt252) {
+            let denshokan_address = self.denshokan_address.read();
+            assert_token_ownership(denshokan_address, game_id);
+            pre_action(denshokan_address, game_id);
+
+            let mut world = self.world_default();
+            let mut game: Game = world.read_model(game_id);
+
+            // Cost: refresh_count * 500 capital (first refresh is free)
+            let cost: u16 = game.refresh_count.into() * 500;
+            assert(game.capital >= cost, 'Not enough capital');
+            game.capital -= cost;
+
+            // Generate entirely new market
+            game.market_packed = market::pack_market_from_seed(VRFImpl::seed(), game.market_size);
+            game.refresh_count += 1;
+
             world.write_model(@game);
             post_action(denshokan_address, game_id);
         }

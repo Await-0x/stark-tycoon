@@ -1,5 +1,6 @@
 import type { NetworkConfig } from "@/utils/networkConfig";
 import { getNetworkConfig } from "@/utils/networkConfig";
+import { stringToFelt } from "@/utils/utils";
 import ControllerConnector from "@cartridge/connector/controller";
 import { sepolia } from "@starknet-react/chains";
 import {
@@ -31,6 +32,7 @@ const cartridgeController =
       policies: controllerConfig.policies,
       namespace: controllerConfig.namespace,
       chains: controllerConfig.chains,
+      defaultChainId: stringToFelt(controllerConfig.chainId).toString(),
       propagateSessionErrors: true,
       shouldOverridePresetPolicies: true,
     })
@@ -69,3 +71,4 @@ export function useDynamicConnector() {
     );
   return ctx;
 }
+
