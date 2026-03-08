@@ -1,8 +1,8 @@
 use crate::constants::TOTAL_BUILDINGS;
 
 /// Compute 32^exp using repeated multiplication.
-pub fn pow32(exp: u8) -> u64 {
-    let mut result: u64 = 1;
+pub fn pow32(exp: u8) -> u32 {
+    let mut result: u32 = 1;
     let mut i: u8 = 0;
     loop {
         if i >= exp {
@@ -15,19 +15,19 @@ pub fn pow32(exp: u8) -> u64 {
 }
 
 /// Extract the building_id stored at the given slot (5 bits per slot).
-pub fn get_slot(packed: u64, slot: u8) -> u8 {
+pub fn get_slot(packed: u32, slot: u8) -> u8 {
     ((packed / pow32(slot)) % 32).try_into().unwrap()
 }
 
 /// Replace the building_id at the given slot, returning the updated packed value.
-pub fn set_slot(packed: u64, slot: u8, new_value: u8) -> u64 {
-    let old_value: u64 = get_slot(packed, slot).into();
+pub fn set_slot(packed: u32, slot: u8, new_value: u8) -> u32 {
+    let old_value: u32 = get_slot(packed, slot).into();
     let factor = pow32(slot);
     packed - old_value * factor + new_value.into() * factor
 }
 
 /// Find the slot index containing `building_id`. Returns None if not found.
-pub fn find_building(packed: u64, building_id: u8, market_size: u8) -> Option<u8> {
+pub fn find_building(packed: u32, building_id: u8, market_size: u8) -> Option<u8> {
     let mut i: u8 = 0;
     loop {
         if i >= market_size {
@@ -41,10 +41,10 @@ pub fn find_building(packed: u64, building_id: u8, market_size: u8) -> Option<u8
 }
 
 /// Derive N building IDs (1..=TOTAL_BUILDINGS) from a VRF seed and pack them.
-pub fn pack_market_from_seed(seed: felt252, market_size: u8) -> u64 {
+pub fn pack_market_from_seed(seed: felt252, market_size: u8) -> u32 {
     let mut value: u256 = seed.into();
     let total: u256 = TOTAL_BUILDINGS.into();
-    let mut packed: u64 = 0;
+    let mut packed: u32 = 0;
     let mut i: u8 = 0;
     loop {
         if i >= market_size {
@@ -59,7 +59,7 @@ pub fn pack_market_from_seed(seed: felt252, market_size: u8) -> u64 {
 }
 
 /// Replace one slot with a new building derived from a fresh VRF seed.
-pub fn replace_slot_from_seed(packed: u64, slot: u8, seed: felt252) -> u64 {
+pub fn replace_slot_from_seed(packed: u32, slot: u8, seed: felt252) -> u32 {
     let value: u256 = seed.into();
     let total: u256 = TOTAL_BUILDINGS.into();
     let building_id: u8 = (value % total).try_into().unwrap() + 1;

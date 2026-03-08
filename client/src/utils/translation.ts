@@ -55,7 +55,7 @@ function hexToBigInt(hex: string | undefined): bigint {
 //   game_id, capital(u32), users(u32), research(u32), transactions(u32),
 //   capital_production(u16), users_production(u16), research_production(u16),
 //   transactions_production(u16), users_multiplier(u16), research_multiplier(u16),
-//   tx_multiplier(u16), game_time(u16), market_size(u8), market_packed(u64)
+//   tx_multiplier(u16), game_time(u16), market_size(u8), market_packed(u32)
 function decodeGameState(
   keys: string[],
   values: string[]

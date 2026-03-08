@@ -21,7 +21,7 @@ pub struct Game {
     pub game_time: u16,
     // Market
     pub market_size: u8,
-    pub market_packed: u64,
+    pub market_packed: u32,
     pub refresh_count: u8,
 }
 
