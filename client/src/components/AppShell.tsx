@@ -12,11 +12,11 @@ export function AppShell({ topBar, leftRail, center, rightRail }: AppShellProps)
   return (
     <Box
       sx={{
-        height: "100vh",
+        height: "100dvh",
         width: "100vw",
         display: "grid",
-        gridTemplateColumns: "240px 1fr 320px",
-        gridTemplateRows: "72px 1fr",
+        gridTemplateColumns: { xs: "1fr", md: "240px 1fr 320px" },
+        gridTemplateRows: { xs: "56px 1fr", md: "72px 1fr" },
         gap: 0,
         overflow: "hidden",
       }}
@@ -28,7 +28,7 @@ export function AppShell({ topBar, leftRail, center, rightRail }: AppShellProps)
           gridRow: "1",
           display: "flex",
           alignItems: "center",
-          px: 3,
+          px: { xs: 1.5, md: 3 },
           borderBottom: "1px solid",
           borderColor: "line.0",
           bgcolor: "rgba(7, 10, 18, 0.85)",
@@ -39,9 +39,10 @@ export function AppShell({ topBar, leftRail, center, rightRail }: AppShellProps)
         {topBar}
       </Box>
 
-      {/* Left rail */}
+      {/* Left rail — desktop only */}
       <Box
         sx={{
+          display: { xs: "none", md: "block" },
           gridColumn: "1",
           gridRow: "2",
           overflow: "auto",
@@ -56,21 +57,22 @@ export function AppShell({ topBar, leftRail, center, rightRail }: AppShellProps)
       {/* Center board */}
       <Box
         sx={{
-          gridColumn: "2",
+          gridColumn: { xs: "1", md: "2" },
           gridRow: "2",
-          overflow: "auto",
+          overflow: "hidden",
           display: "flex",
-          alignItems: "center",
+          alignItems: { xs: "stretch", md: "center" },
           justifyContent: "center",
-          p: 2,
+          p: { xs: 0, md: 2 },
         }}
       >
         {center}
       </Box>
 
-      {/* Right rail */}
+      {/* Right rail — desktop only */}
       <Box
         sx={{
+          display: { xs: "none", md: "block" },
           gridColumn: "3",
           gridRow: "2",
           overflow: "auto",

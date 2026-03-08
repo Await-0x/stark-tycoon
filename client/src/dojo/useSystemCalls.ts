@@ -160,6 +160,16 @@ export const useSystemCalls = () => {
     return calls;
   };
 
+  const destroyBuilding = (gameId: string, positionId: number): Call[] => {
+    return [
+      {
+        contractAddress: GAME_ADDRESS,
+        entrypoint: "destroy_building",
+        calldata: CallData.compile([gameId, positionId]),
+      },
+    ];
+  };
+
   const submitScore = (gameId: string): Call[] => {
     return [
       {
@@ -243,6 +253,7 @@ export const useSystemCalls = () => {
     startGame,
     buyBuilding,
     upgradeBuilding,
+    destroyBuilding,
     refreshMarket,
     submitScore,
   };
@@ -312,12 +323,13 @@ export async function fetchGameState(
     const buildingsCount = hex(r[18]);
     const buildings: Building[] = [];
     for (let i = 0; i < buildingsCount; i++) {
-      const base = 19 + i * 4;
+      const base = 19 + i * 5;
       buildings.push({
         gameId: r[base],
         positionId: hex(r[base + 1]),
         buildingId: hex(r[base + 2]),
         upgradeLevel: hex(r[base + 3]),
+        bonusConsumed: hex(r[base + 4]),
       });
     }
 

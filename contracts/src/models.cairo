@@ -42,4 +42,5 @@ pub struct Building {
     pub position_id: u8,
     pub building_id: u8,
     pub upgrade_level: u8,
+    pub bonus_consumed: u8,
 }

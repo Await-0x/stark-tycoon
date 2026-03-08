@@ -41,8 +41,10 @@ export function GameBoard({ onTileClick }: GameBoardProps) {
     >
       {Array.from({ length: BOARD_SIZE }, (_, i) => {
         const building = buildingMap.get(i);
+        const hasBuilding = building && building.buildingId > 0;
+        const bonusConsumed = building?.bonusConsumed === 1;
         const isSelected = selectedPosition === i;
-        const isPlacementTarget = !building && selectedMarketBuildingId !== null;
+        const isPlacementTarget = !hasBuilding && selectedMarketBuildingId !== null;
         const bonus: TileBonus | null = boardSeed != null ? deriveTileBonus(boardSeed, i) : null;
         const hasBonusDisplay = bonus != null && bonus.bonusType !== 0;
 
@@ -60,7 +62,7 @@ export function GameBoard({ onTileClick }: GameBoardProps) {
                 : isPlacementTarget
                   ? "rgba(66, 198, 255, 0.4)"
                   : "line.0",
-              bgcolor: building
+              bgcolor: hasBuilding
                 ? "rgba(14, 22, 40, 0.6)"
                 : "rgba(10, 16, 30, 0.4)",
               cursor: "pointer",
@@ -73,7 +75,7 @@ export function GameBoard({ onTileClick }: GameBoardProps) {
                 borderColor: "#42C6FF",
                 boxShadow: "0 0 12px rgba(66, 198, 255, 0.2)",
               },
-              ...(isPlacementTarget && !building
+              ...(isPlacementTarget && !hasBuilding
                 ? {
                     borderStyle: "dashed",
                     animation: "pulse-glow 2s ease-in-out infinite",
@@ -86,7 +88,7 @@ export function GameBoard({ onTileClick }: GameBoardProps) {
             }}
           >
             <AnimatePresence>
-              {building && (
+              {hasBuilding && (
                 <motion.div
                   initial={{ scale: 0, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
@@ -137,10 +139,10 @@ export function GameBoard({ onTileClick }: GameBoardProps) {
                 </motion.div>
               )}
             </AnimatePresence>
-            {!building && hasBonusDisplay && (
+            {!hasBuilding && hasBonusDisplay && !bonusConsumed && (
               <TileBonusBadge bonus={bonus} position="center" />
             )}
-            {!building && !hasBonusDisplay && isPlacementTarget && (
+            {!hasBuilding && !hasBonusDisplay && isPlacementTarget && (
               <Typography
                 sx={{
                   fontSize: "1.2rem",

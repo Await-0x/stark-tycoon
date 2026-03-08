@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
 import Dialog from "@mui/material/Dialog";
@@ -26,6 +27,31 @@ export function Leaderboard({ open, onClose }: LeaderboardProps) {
   const sorted = tokens?.data
     .slice()
     .sort((a, b) => b.score - a.score) ?? [];
+
+  const [usernames, setUsernames] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (sorted.length === 0) return;
+    const addresses = [...new Set(sorted.map((t) => t.owner))].map((a) =>
+      a.toLowerCase().replace(/^0x0+/, "0x")
+    );
+    fetch("https://api.cartridge.gg/accounts/lookup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ addresses }),
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        const map: Record<string, string> = {};
+        for (const result of data.results ?? []) {
+          for (const addr of result.addresses ?? []) {
+            map[addr.toLowerCase()] = result.username;
+          }
+        }
+        setUsernames(map);
+      })
+      .catch(() => {});
+  }, [sorted.length]);
 
   return (
     <Dialog
@@ -107,7 +133,7 @@ export function Leaderboard({ open, onClose }: LeaderboardProps) {
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {token.playerName || `${token.owner.slice(0, 6)}...${token.owner.slice(-4)}`}
+                    {usernames[token.owner.toLowerCase().replace(/^0x0+/, "0x")] || `${token.owner.slice(0, 6)}...${token.owner.slice(-4)}`}
                   </Typography>
                 </Box>
                 <Typography

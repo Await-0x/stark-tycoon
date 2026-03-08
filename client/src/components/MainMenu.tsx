@@ -101,18 +101,22 @@ export function MainMenu() {
         sx={{
           position: "absolute",
           inset: 0,
-          background:
-            "linear-gradient(to right, rgba(7, 10, 18, 0.85) 0%, rgba(7, 10, 18, 0.4) 25%, transparent 100%)",
+          background: {
+            xs: "rgba(7, 10, 18, 0.7)",
+            md: "linear-gradient(to right, rgba(7, 10, 18, 0.85) 0%, rgba(7, 10, 18, 0.4) 25%, transparent 100%)",
+          },
         }}
       />
 
       <GlassPanel
         sx={{
           position: "absolute",
-          top: 32,
-          left: 32,
-          width: 340,
-          minHeight: 520,
+          top: { xs: "50%", md: 32 },
+          left: { xs: "50%", md: 32 },
+          transform: { xs: "translate(-50%, -50%)", md: "none" },
+          width: { xs: "88%", sm: 340 },
+          maxWidth: 340,
+          minHeight: { xs: "auto", md: 520 },
           display: "flex",
           flexDirection: "column",
           gap: 1.5,

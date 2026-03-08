@@ -60,6 +60,7 @@ export interface Building {
   positionId: number;
   buildingId: number;
   upgradeLevel: number;
+  bonusConsumed: number;
 }
 
 // ── Game State (mirrors Cairo GameState) ──
@@ -113,12 +114,19 @@ export interface SubmitScoreAction {
   gameId: string;
 }
 
+export interface DestroyBuildingAction {
+  type: "destroy_building";
+  gameId: string;
+  positionId: number;
+}
+
 export type GameAction =
   | StartGameAction
   | BuyBuildingAction
   | UpgradeBuildingAction
   | RefreshMarketAction
-  | SubmitScoreAction;
+  | SubmitScoreAction
+  | DestroyBuildingAction;
 
 // ── Building Specs (all 25 buildings) ──
 

@@ -23,7 +23,7 @@ const NETWORKS = {
   SN_SEPOLIA: {
     chainId: ChainId.SN_SEPOLIA,
     manifest,
-    namespace: "ST_0_0_2",
+    namespace: "ST_0_0_3",
     rpcUrl: "https://api.cartridge.gg/x/starknet/sepolia",
   },
 };
@@ -56,6 +56,11 @@ function buildPolicies(gameAddress: string) {
             entrypoint: "refresh_market",
           },
           {
+            name: "Destroy Building",
+            description: "Remove a building from the board",
+            entrypoint: "destroy_building",
+          },
+          {
             name: "Submit Score",
             description: "Finalize game score after session ends",
             entrypoint: "submit_score",
@@ -85,7 +90,7 @@ const _resolved = (() => {
 export const GAME_ADDRESS = _resolved;
 
 // Denshokan registry game ID for Stark Tycoon
-export const DENSHOKAN_GAME_ID = 14;
+export const DENSHOKAN_GAME_ID = 20;
 
 export function getNetworkConfig(
   networkKey: string = ChainId.SN_SEPOLIA

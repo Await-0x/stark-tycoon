@@ -61,6 +61,7 @@ export const GameDirector = ({ children }: PropsWithChildren) => {
     startGame,
     buyBuilding,
     upgradeBuilding,
+    destroyBuilding,
     refreshMarket,
     submitScore,
   } = useSystemCalls();
@@ -173,11 +174,18 @@ export const GameDirector = ({ children }: PropsWithChildren) => {
             };
           });
         }
-        // Optimistic: place building on board
-        setBuildings((prev) => [
-          ...prev,
-          { gameId: action.gameId, positionId: action.positionId, buildingId: action.buildingId, upgradeLevel: 0 },
-        ]);
+        // Optimistic: place building on board (upsert in case consumed empty tile exists)
+        setBuildings((prev) => {
+          const idx = prev.findIndex(
+            (b) => b.gameId === action.gameId && b.positionId === action.positionId
+          );
+          if (idx >= 0) {
+            const updated = [...prev];
+            updated[idx] = { ...updated[idx], buildingId: action.buildingId, upgradeLevel: 0, bonusConsumed: 1 };
+            return updated;
+          }
+          return [...prev, { gameId: action.gameId, positionId: action.positionId, buildingId: action.buildingId, upgradeLevel: 0, bonusConsumed: 1 }];
+        });
 
         // Clear selections
         setSelectedMarketBuildingId(null);
@@ -232,6 +240,62 @@ export const GameDirector = ({ children }: PropsWithChildren) => {
         txs.push(
           ...upgradeBuilding(action.gameId, action.positionId, action.upgradeId)
         );
+        break;
+      }
+
+      case "destroy_building": {
+        setActionInProgress(true);
+        // Optimistic: zero building on board (preserve bonusConsumed)
+        setBuildings((prev) =>
+          prev.map((b) =>
+            b.gameId === action.gameId && b.positionId === action.positionId
+              ? { ...b, buildingId: 0, upgradeLevel: 0 }
+              : b
+          )
+        );
+        // Optimistic: subtract production (base + upgrades)
+        const bld = prevBuildings.find(
+          (b) => b.gameId === action.gameId && b.positionId === action.positionId
+        );
+        if (bld) {
+          const dSpec = BUILDING_SPECS[bld.buildingId];
+          if (dSpec) {
+            let capProd = dSpec.capitalProduction;
+            let usrProd = dSpec.usersProduction;
+            let resProd = dSpec.researchProduction;
+            let txProd = dSpec.txProduction;
+            let usrMul = dSpec.usersMultiplier;
+            let resMul = dSpec.researchMultiplier;
+            let txMul = dSpec.txMultiplier;
+            const upgrades = UPGRADE_SPECS[bld.buildingId];
+            if (upgrades) {
+              for (let i = 0; i < bld.upgradeLevel; i++) {
+                capProd += upgrades[i].capitalProduction;
+                usrProd += upgrades[i].usersProduction;
+                resProd += upgrades[i].researchProduction;
+                txProd += upgrades[i].txProduction;
+                usrMul += upgrades[i].usersMultiplier;
+                resMul += upgrades[i].researchMultiplier;
+                txMul += upgrades[i].txMultiplier;
+              }
+            }
+            setGameState((prev) => {
+              if (!prev) return prev;
+              return {
+                ...prev,
+                capitalProduction: prev.capitalProduction - capProd,
+                usersProduction: prev.usersProduction - usrProd,
+                researchProduction: prev.researchProduction - resProd,
+                transactionsProduction: prev.transactionsProduction - txProd,
+                usersMultiplier: prev.usersMultiplier - usrMul,
+                researchMultiplier: prev.researchMultiplier - resMul,
+                txMultiplier: prev.txMultiplier - txMul,
+              };
+            });
+          }
+        }
+        setSelectedPosition(null);
+        txs.push(...destroyBuilding(action.gameId, action.positionId));
         break;
       }
 
@@ -297,6 +361,8 @@ export const GameDirector = ({ children }: PropsWithChildren) => {
       });
     } else if (action.type === "upgrade_building") {
       addNotification({ type: "success", message: "Upgrade applied!" });
+    } else if (action.type === "destroy_building") {
+      addNotification({ type: "success", message: "Building destroyed" });
     } else if (action.type === "refresh_market") {
       addNotification({ type: "success", message: "Market refreshed!" });
     } else if (action.type === "submit_score") {

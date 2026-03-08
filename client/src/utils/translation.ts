@@ -15,9 +15,9 @@ const normalizeSelector = (sel: string | bigint): string => {
 };
 
 // ── Model selectors from manifest (namespaced by Dojo) ──
-const GAME_MODEL_NORMALIZED = normalizeSelector("0x00210d04d219dd4aa700834162315f55ec5a1014afe479ada396a4c702307683");
-const BUILDING_MODEL_NORMALIZED = normalizeSelector("0x070449f70d2647d4d914350435ed6702dca99bc46cb55f81de792de4cdfeb301");
-const BOARD_MODEL_NORMALIZED = normalizeSelector("0x06f312b28cca0b15dc92182ef22763f751285892c73b969b6cc15f6b10f7c604");
+const GAME_MODEL_NORMALIZED = normalizeSelector("0x33da3edecd69bc58d3bfc315702d8e53f89dec9a3dd101f169a22513aad285f");
+const BUILDING_MODEL_NORMALIZED = normalizeSelector("0x4039c5088df644b362e2634d0d57dfb232492b6d97fb3cb19cd05c7ee0c37bd");
+const BOARD_MODEL_NORMALIZED = normalizeSelector("0x530bb4ba71bc1c68d1ed0399a2ce8f08a26a152e9fed218baba8a0fedf827c1");
 
 // ── Translated event types ──
 
@@ -92,7 +92,7 @@ function decodeBuildingUpdate(
   keys: string[],
   values: string[]
 ): BuildingTranslation | null {
-  if (keys.length < 2 || values.length < 2) return null;
+  if (keys.length < 2 || values.length < 3) return null;
 
   return {
     componentName: "Building",
@@ -101,6 +101,7 @@ function decodeBuildingUpdate(
       positionId: hexToNumber(keys[1]),
       buildingId: hexToNumber(values[0]),
       upgradeLevel: hexToNumber(values[1]),
+      bonusConsumed: hexToNumber(values[2]),
     },
   };
 }

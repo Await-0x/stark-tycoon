@@ -1,8 +1,12 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import Drawer from "@mui/material/Drawer";
 import Typography from "@mui/material/Typography";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
 import SportsEsportsOutlinedIcon from "@mui/icons-material/SportsEsportsOutlined";
+import StorefrontRounded from "@mui/icons-material/StorefrontRounded";
 import { useGameDirector } from "@/contexts/GameDirector";
 import { useGameStore } from "@/stores/gameStore";
 import { useController } from "@/contexts/controller";
@@ -17,6 +21,8 @@ import { BuildingDetails } from "./BuildingDetails";
 import { GameEndOverlay } from "./GameEndOverlay";
 
 export function GameScreen() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const { account, address, playerName, isPending, openProfile, login } =
     useController();
   const { executeGameAction } = useGameDirector();
@@ -30,6 +36,10 @@ export function GameScreen() {
   const setSelectedMarketBuildingId = useGameStore((s) => s.setSelectedMarketBuildingId);
   const { isExpired } = useGameTimer();
   const submitFiredRef = useRef(false);
+
+  // Mobile drawer state
+  const [marketOpen, setMarketOpen] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
   useEffect(() => { preloadBuildingImages(); }, []);
 
@@ -48,6 +58,25 @@ export function GameScreen() {
     if (selectedPosition === null) return null;
     return buildings.find((b) => b.positionId === selectedPosition) ?? null;
   }, [selectedPosition, buildings]);
+
+  // Mobile: auto-open details drawer when a building is selected
+  useEffect(() => {
+    if (isMobile && selectedBuilding) {
+      setDetailsOpen(true);
+    }
+  }, [isMobile, selectedBuilding]);
+
+  // Mobile: auto-close market drawer when a building is picked
+  useEffect(() => {
+    if (isMobile && selectedMarketBuildingId !== null) {
+      setMarketOpen(false);
+    }
+  }, [isMobile, selectedMarketBuildingId]);
+
+  const handleDetailsClose = useCallback(() => {
+    setDetailsOpen(false);
+    setSelectedPosition(null);
+  }, [setSelectedPosition]);
 
   const handleTileClick = useCallback(
     (positionId: number) => {
@@ -68,11 +97,48 @@ export function GameScreen() {
     [buildings, selectedPosition, selectedMarketBuildingId, setSelectedPosition, setSelectedMarketBuildingId, gameId, actionInProgress, executeGameAction]
   );
 
+  const handleUpgrade = useCallback(
+    (positionId: number, upgradeIndex: number) => {
+      if (gameId && !actionInProgress) {
+        executeGameAction({
+          type: "upgrade_building",
+          gameId,
+          positionId,
+          upgradeId: upgradeIndex + 1,
+        });
+      }
+    },
+    [gameId, actionInProgress, executeGameAction]
+  );
+
+  const handleDestroy = useCallback(
+    (positionId: number) => {
+      if (gameId && !actionInProgress) {
+        if (isMobile) setDetailsOpen(false);
+        executeGameAction({
+          type: "destroy_building",
+          gameId,
+          positionId,
+        });
+      }
+    },
+    [gameId, actionInProgress, executeGameAction, isMobile]
+  );
+
+  const drawerPaperSx = {
+    bgcolor: "rgba(10, 16, 30, 0.95)",
+    borderTop: "1px solid",
+    borderColor: "line.0",
+    borderRadius: "16px 16px 0 0",
+    backdropFilter: "blur(12px)",
+    maxHeight: "70vh",
+  };
+
   return (
     <>
     <AppShell
       topBar={
-        <Box sx={{ display: "flex", alignItems: "center", width: "100%", gap: 2 }}>
+        <Box sx={{ display: "flex", alignItems: "center", width: "100%", gap: { xs: 1, md: 2 } }}>
           <Typography
             variant="h6"
             sx={{
@@ -82,6 +148,7 @@ export function GameScreen() {
               fontWeight: 700,
               letterSpacing: "-0.02em",
               flexShrink: 0,
+              display: { xs: "none", md: "block" },
             }}
           >
             Stark Tycoon
@@ -95,14 +162,17 @@ export function GameScreen() {
               color="secondary"
               size="small"
               startIcon={
-                <SportsEsportsOutlinedIcon htmlColor="secondary.contrastText" />
+                isMobile ? undefined : <SportsEsportsOutlinedIcon htmlColor="secondary.contrastText" />
               }
               sx={{
                 flexShrink: 0,
                 justifyContent: "center",
                 color: "secondary.contrastText",
                 opacity: 1,
-                height: "36px",
+                height: { xs: "32px", md: "36px" },
+                fontSize: { xs: "0.75rem", md: "0.875rem" },
+                minWidth: 0,
+                px: { xs: 1.5, md: 2 },
               }}
             >
               {playerName || `${address.slice(0, 6)}...${address.slice(-4)}`}
@@ -115,13 +185,16 @@ export function GameScreen() {
               color="secondary"
               size="small"
               startIcon={
-                <SportsEsportsOutlinedIcon htmlColor="secondary.contrastText" />
+                isMobile ? undefined : <SportsEsportsOutlinedIcon htmlColor="secondary.contrastText" />
               }
               sx={{
                 flexShrink: 0,
                 justifyContent: "center",
                 color: "secondary.contrastText",
-                height: "36px",
+                height: { xs: "32px", md: "36px" },
+                fontSize: { xs: "0.75rem", md: "0.875rem" },
+                minWidth: 0,
+                px: { xs: 1.5, md: 2 },
               }}
             >
               Log In
@@ -135,23 +208,84 @@ export function GameScreen() {
           {selectedBuilding && (
             <BuildingDetails
               building={selectedBuilding}
-              onUpgrade={(positionId: number, upgradeIndex: number) => {
-                if (gameId && !actionInProgress) {
-                  executeGameAction({
-                    type: "upgrade_building",
-                    gameId,
-                    positionId,
-                    upgradeId: upgradeIndex + 1,
-                  });
-                }
-              }}
+              onUpgrade={handleUpgrade}
+              onDestroy={handleDestroy}
             />
           )}
         </>
       }
-      center={<GameBoard onTileClick={handleTileClick} />}
+      center={
+        isMobile ? (
+          <Box sx={{ display: "flex", flexDirection: "column", height: "100%", width: "100%" }}>
+            <ResourceBar compact />
+            <Box sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", p: 1, overflow: "auto" }}>
+              <GameBoard onTileClick={handleTileClick} />
+            </Box>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                p: 1,
+                pb: 2,
+                borderTop: "1px solid",
+                borderColor: "line.0",
+                bgcolor: "rgba(7, 10, 18, 0.85)",
+                backdropFilter: "blur(8px)",
+              }}
+            >
+              <Button
+                variant={selectedMarketBuildingId !== null ? "outlined" : "contained"}
+                onClick={() => setMarketOpen(true)}
+                startIcon={<StorefrontRounded />}
+                sx={{ borderRadius: "10px", px: 3, fontWeight: 700 }}
+              >
+                {selectedMarketBuildingId !== null ? "Change Selection" : "Market"}
+              </Button>
+            </Box>
+          </Box>
+        ) : (
+          <GameBoard onTileClick={handleTileClick} />
+        )
+      }
       rightRail={<MarketPanel />}
     />
+
+    {/* Mobile: Market Drawer */}
+    {isMobile && (
+      <Drawer
+        anchor="bottom"
+        open={marketOpen}
+        onClose={() => setMarketOpen(false)}
+        PaperProps={{ sx: drawerPaperSx }}
+      >
+        <Box sx={{ width: 32, height: 4, borderRadius: 2, bgcolor: "rgba(110, 190, 255, 0.3)", mx: "auto", mt: 1, mb: 0.5 }} />
+        <Box sx={{ p: 2, pt: 0.5, overflow: "auto" }}>
+          <MarketPanel />
+        </Box>
+      </Drawer>
+    )}
+
+    {/* Mobile: Building Details Drawer */}
+    {isMobile && (
+      <Drawer
+        anchor="bottom"
+        open={detailsOpen && selectedBuilding !== null}
+        onClose={handleDetailsClose}
+        PaperProps={{ sx: drawerPaperSx }}
+      >
+        <Box sx={{ width: 32, height: 4, borderRadius: 2, bgcolor: "rgba(110, 190, 255, 0.3)", mx: "auto", mt: 1, mb: 0.5 }} />
+        <Box sx={{ px: 2, pb: 2 }}>
+          {selectedBuilding && (
+            <BuildingDetails
+              building={selectedBuilding}
+              onUpgrade={handleUpgrade}
+              onDestroy={handleDestroy}
+            />
+          )}
+        </Box>
+      </Drawer>
+    )}
+
     <GameEndOverlay />
     </>
   );

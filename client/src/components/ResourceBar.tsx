@@ -34,9 +34,46 @@ function getProductionRate(
   }
 }
 
-export function ResourceBar() {
+export function ResourceBar({ compact = false }: { compact?: boolean }) {
   const resources = useResourceTicker();
   const gameState = useGameStore((s) => s.gameState);
+
+  if (compact) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-around",
+          px: 1,
+          py: 0.75,
+          borderBottom: "1px solid",
+          borderColor: "line.0",
+          bgcolor: "rgba(7, 10, 18, 0.6)",
+          flexShrink: 0,
+        }}
+      >
+        {RESOURCE_CONFIG.map((res) => (
+          <Box key={res.key} sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+            <Box sx={{ color: res.color, display: "flex", lineHeight: 0, "& svg": { fontSize: 14 } }}>
+              {res.icon}
+            </Box>
+            <Typography
+              sx={{
+                fontSize: "0.75rem",
+                fontWeight: 700,
+                color: res.color,
+                fontVariantNumeric: "tabular-nums",
+                lineHeight: 1,
+              }}
+            >
+              {Math.floor(resources[res.key]).toLocaleString()}
+            </Typography>
+          </Box>
+        ))}
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>

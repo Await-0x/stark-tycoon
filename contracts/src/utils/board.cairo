@@ -13,7 +13,7 @@ pub fn derive_tile_bonus(seed: u64, position_id: u8) -> TileBonus {
     while i < position_id {
         entropy = entropy / 40;
         i += 1;
-    };
+    }
 
     let bonus_type: u8 = (entropy % 8).try_into().unwrap();
     let raw_value: u16 = ((entropy / 8) % 5).try_into().unwrap();
