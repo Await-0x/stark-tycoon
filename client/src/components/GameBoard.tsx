@@ -134,9 +134,6 @@ export function GameBoard({ onTileClick }: GameBoardProps) {
                       ))}
                     </Box>
                   )}
-                  {hasBonusDisplay && (
-                    <TileBonusBadge bonus={bonus} position="bottom-left" />
-                  )}
                 </motion.div>
               )}
             </AnimatePresence>
