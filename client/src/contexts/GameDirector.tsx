@@ -105,12 +105,6 @@ export const GameDirector = ({ children }: PropsWithChildren) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameId]);
 
-  // Reset UI loading on failure
-  useEffect(() => {
-    setActionInProgress(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionFailed]);
-
   // ── Apply game state events to store ──
   const applyGameStateEvents = (events: TranslatedGameEvent[]) => {
     const gameStateEvents = events.filter(isGameStateEvent);
@@ -153,15 +147,16 @@ export const GameDirector = ({ children }: PropsWithChildren) => {
     const txs: Call[] = [];
     const prevGameState = useGameStore.getState().gameState;
     const prevBuildings = useGameStore.getState().buildings;
+    // Only lock UI for actions that must be sequential
+    const needsLock = action.type === "upgrade_building" || action.type === "start_game";
+    if (needsLock) setActionInProgress(true);
 
     switch (action.type) {
       case "start_game":
-        setActionInProgress(true);
         txs.push(...startGame(action.playerName));
         break;
 
       case "buy_building": {
-        setActionInProgress(true);
         // Optimistic: deduct costs locally
         const spec = BUILDING_SPECS[action.buildingId];
         if (spec) {
@@ -206,7 +201,6 @@ export const GameDirector = ({ children }: PropsWithChildren) => {
       }
 
       case "upgrade_building": {
-        setActionInProgress(true);
         // Optimistic: deduct research cost
         const building = useGameStore
           .getState()
@@ -244,7 +238,6 @@ export const GameDirector = ({ children }: PropsWithChildren) => {
       }
 
       case "destroy_building": {
-        setActionInProgress(true);
         // Optimistic: zero building on board (preserve bonusConsumed)
         setBuildings((prev) =>
           prev.map((b) =>
@@ -300,7 +293,6 @@ export const GameDirector = ({ children }: PropsWithChildren) => {
       }
 
       case "refresh_market": {
-        setActionInProgress(true);
         // Optimistic: deduct cost
         const refreshCount = prevGameState?.refreshCount ?? 0;
         const refreshCost = refreshCount * 500;
@@ -316,7 +308,6 @@ export const GameDirector = ({ children }: PropsWithChildren) => {
       }
 
       case "submit_score":
-        setActionInProgress(true);
         setGamePhase("submitting");
         txs.push(...submitScore(action.gameId));
         break;
@@ -339,6 +330,7 @@ export const GameDirector = ({ children }: PropsWithChildren) => {
       setBuildings(prevBuildings);
       setLoadingMarketSlot(null);
       setLoadingMarketRefresh(false);
+      if (needsLock) setActionInProgress(false);
       setActionFailed();
       if (!isSubmit) {
         addNotification({ type: "error", message: "Action failed" });
@@ -349,7 +341,7 @@ export const GameDirector = ({ children }: PropsWithChildren) => {
     applyGameStateEvents(events);
     setLoadingMarketSlot(null);
     setLoadingMarketRefresh(false);
-    setActionInProgress(false);
+    if (needsLock) setActionInProgress(false);
 
     if (action.type === "start_game") {
       addNotification({ type: "success", message: "Game started!" });

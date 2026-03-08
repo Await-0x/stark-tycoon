@@ -208,13 +208,12 @@ export function MarketPanel() {
   const setSelectedPosition = useGameStore((s) => s.setSelectedPosition);
   const loadingMarketSlot = useGameStore((s) => s.loadingMarketSlot);
   const loadingMarketRefresh = useGameStore((s) => s.loadingMarketRefresh);
-  const actionInProgress = useGameStore((s) => s.actionInProgress);
   const { executeGameAction } = useGameDirector();
   const resources = useResourceTicker();
 
   const refreshCount = gameState?.refreshCount ?? 0;
   const refreshCost = refreshCount * 500;
-  const canAffordRefresh = resources.capital >= refreshCost && !actionInProgress;
+  const canAffordRefresh = resources.capital >= refreshCost;
 
   const handleRefresh = () => {
     if (!gameId || !canAffordRefresh) return;

@@ -11,6 +11,7 @@ import { useGameDirector } from "@/contexts/GameDirector";
 import { useGameStore } from "@/stores/gameStore";
 import { useController } from "@/contexts/controller";
 import { useGameTimer } from "@/hooks/useGameTimer";
+import { GAME_DURATION } from "@/types/game";
 import { preloadBuildingImages } from "@/utils/buildingImages";
 import { AppShell } from "./AppShell";
 import { ResourceBar } from "./ResourceBar";
@@ -26,6 +27,8 @@ export function GameScreen() {
   const { account, address, playerName, isPending, openProfile, login } =
     useController();
   const { executeGameAction } = useGameDirector();
+  const executeRef = useRef(executeGameAction);
+  executeRef.current = executeGameAction;
   const buildings = useGameStore((s) => s.buildings);
   const gameId = useGameStore((s) => s.gameId);
   const actionInProgress = useGameStore((s) => s.actionInProgress);
@@ -43,16 +46,19 @@ export function GameScreen() {
 
   useEffect(() => { preloadBuildingImages(); }, []);
 
-  // Auto-submit score when timer expires (2s delay for block timestamp lag)
+  // Auto-submit score once wall clock passes mintedAt + GAME_DURATION + 2s
+  // (the +2s buffer accounts for block timestamp lagging behind real time)
+  const gameState = useGameStore((s) => s.gameState);
   useEffect(() => {
-    if (isExpired && gamePhase === "playing" && gameId && !submitFiredRef.current) {
-      submitFiredRef.current = true;
-      const timer = setTimeout(() => {
-        executeGameAction({ type: "submit_score", gameId });
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [isExpired, gamePhase, gameId, executeGameAction]);
+    if (!isExpired || gamePhase !== "playing" || !gameId || !gameState || submitFiredRef.current) return;
+    submitFiredRef.current = true;
+    const deadline = (gameState.mintedAt + GAME_DURATION + 2) * 1000;
+    const delay = Math.max(0, deadline - Date.now());
+    const timer = setTimeout(() => {
+      executeRef.current({ type: "submit_score", gameId });
+    }, delay);
+    return () => clearTimeout(timer);
+  }, [isExpired, gamePhase, gameId, gameState]);
 
   const selectedBuilding = useMemo(() => {
     if (selectedPosition === null) return null;
@@ -76,7 +82,7 @@ export function GameScreen() {
   const handleDetailsClose = useCallback(() => {
     setDetailsOpen(false);
     setSelectedPosition(null);
-  }, [setSelectedPosition]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleTileClick = useCallback(
     (positionId: number) => {
@@ -85,8 +91,8 @@ export function GameScreen() {
       if (building) {
         setSelectedMarketBuildingId(null);
         setSelectedPosition(selectedPosition === positionId ? null : positionId);
-      } else if (selectedMarketBuildingId !== null && gameId && !actionInProgress) {
-        executeGameAction({
+      } else if (selectedMarketBuildingId !== null && gameId) {
+        executeRef.current({
           type: "buy_building",
           gameId,
           buildingId: selectedMarketBuildingId,
@@ -94,13 +100,13 @@ export function GameScreen() {
         });
       }
     },
-    [buildings, selectedPosition, selectedMarketBuildingId, setSelectedPosition, setSelectedMarketBuildingId, gameId, actionInProgress, executeGameAction]
+    [buildings, selectedPosition, selectedMarketBuildingId, gameId]
   );
 
   const handleUpgrade = useCallback(
     (positionId: number, upgradeIndex: number) => {
       if (gameId && !actionInProgress) {
-        executeGameAction({
+        executeRef.current({
           type: "upgrade_building",
           gameId,
           positionId,
@@ -108,21 +114,21 @@ export function GameScreen() {
         });
       }
     },
-    [gameId, actionInProgress, executeGameAction]
+    [gameId, actionInProgress]
   );
 
   const handleDestroy = useCallback(
     (positionId: number) => {
-      if (gameId && !actionInProgress) {
+      if (gameId) {
         if (isMobile) setDetailsOpen(false);
-        executeGameAction({
+        executeRef.current({
           type: "destroy_building",
           gameId,
           positionId,
         });
       }
     },
-    [gameId, actionInProgress, executeGameAction, isMobile]
+    [gameId, isMobile]
   );
 
   const drawerPaperSx = {
