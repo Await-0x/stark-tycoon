@@ -226,7 +226,7 @@ export function MainMenu() {
               size="small"
               sx={{ opacity: 0.6, "&:hover": { opacity: 1 } }}
               onClick={() =>
-                window.open("https://github.com/provable-games", "_blank")
+                window.open("https://github.com/Await-0x/stark-tycoon", "_blank")
               }
             >
               <GitHubIcon fontSize="small" />
